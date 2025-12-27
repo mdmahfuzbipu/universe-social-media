@@ -42,6 +42,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # local apps
+    "accounts.apps.AccountsConfig",
+    "posts",
+    "interactions",
+    "notifications",
 ]
 
 MIDDLEWARE = [
@@ -53,6 +58,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+
+AUTH_USER_MODEL = "accounts.User"
+
 
 ROOT_URLCONF = "universe.urls"
 
