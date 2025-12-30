@@ -4,58 +4,150 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="h-screen flex items-center justify-center">
+<div class="min-h-screen flex items-center justify-center px-6">
 
-    <div class="flex w-full max-w-5xl h-[650px] bg-[#111827] rounded-[3rem] shadow-2xl overflow-hidden m-4">
+    <div class="flex w-full max-w-5xl min-h-[620px] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden m-4">
 
-    <!-- LEFT PANEL -->
-    <div class="hidden md:flex w-1/2 bg-gradient-to-tr from-[#FBBF24] via-[#F59E0B] to-[#D97706] p-12 flex-col justify-between">
-        <div>
-            <img src="{% static 'images/universe-logo.png' %}" class="w-48 mb-6" alt="UniVerse Logo">
-            <h1 class="text-4xl font-extrabold text-black">
-                Explore the<br>UniVerse.
-            </h1>
-            <p class="text-black/80 mt-4">
-                Connect. Share. Discover.
-            </p>
+        <!-- LEFT PANEL -->
+        <div class="hidden md:flex w-[45%] bg-gradient-to-tr from-[#FBBF24] via-[#F59E0B] to-[#D97706] p-10 flex-col justify-between relative overflow-hidden">
+
+            <!-- Floating shapes -->
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+            <div class="absolute bottom-20 right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10">
+                <img src="{% static 'images/universe-logo.png' %}" class="w-48 mb-8" alt="UniVerse Logo">
+                <h1 class="text-4xl font-extrabold text-white leading-tight tracking-tight">
+                    Start Your <br>Journey.
+                </h1>
+                <p class="text-black/80 mt-4 text-lg font-semibold">
+                    Join UniVerse and connect with people across the galaxy.
+                </p>
+            </div>
+
+            <div class="relative z-10 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20">
+                <p class="text-white text-sm italic leading-relaxed">
+                    “The best way to predict the future is to create it.”
+                </p>
+                <span class="block mt-3 text-xs font-bold text-white/90">
+                    — UniVerse Team
+                </span>
+            </div>
         </div>
-    </div>
-
 
         <!-- RIGHT PANEL -->
-        <div class="w-full md:w-1/2 p-12 flex flex-col justify-center">
+        <div class="w-full md:w-[55%] p-10 flex flex-col justify-center overflow-y-auto">
 
-            <h2 class="text-3xl font-bold text-gray-100 mb-6">Create Account</h2>
+            <!-- Heading -->
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">
+                    Create Account
+                </h2>
+                <p class="text-gray-400 mt-2">
+                    Join thousands of explorers in the UniVerse.
+                </p>
+            </div>
 
-            <form method="POST" class="space-y-4">
+            <form method="POST" class="space-y-5">
                 {% csrf_token %}
 
                 {% for field in form %}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-100 mb-1">
-                        {{ field.label }}
-                    </label>
-                    {{ field|add_class:"w-full bg-gray-50 border rounded-2xl py-3 px-4 focus:ring-2 focus:ring-purple-200 outline-none" }}
+                <div class="relative">
+
+                    {% if field.name == "username" %}
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-yellow-300 focus:bg-white outline-none transition-all"|attr:"placeholder:Choose a username" }}
+
+                    {% elif field.name == "email" %}
+                        <i class="far fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-yellow-300 focus:bg-white outline-none transition-all"|attr:"placeholder:you@example.com" }}
+
+                    {% elif field.name == "password1" %}
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-yellow-300 focus:bg-white outline-none transition-all"|attr:"placeholder:Create a password"|attr:"id:password1" }}
+                        <button type="button" onclick="togglePassword('password1', this)"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-500 transition">
+                            <i class="far fa-eye"></i>
+                        </button>
+
+                    {% elif field.name == "password2" %}
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-yellow-300 focus:bg-white outline-none transition-all"|attr:"placeholder:Confirm password"|attr:"id:password2" }}
+                        <button type="button" onclick="togglePassword('password2', this)"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-500 transition">
+                            <i class="far fa-eye"></i>
+                        </button>
+
+                    {% endif %}
 
                     {% for error in field.errors %}
-                        <p class="text-red-500 text-sm">{{ error }}</p>
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
                 {% endfor %}
 
-            <button type="submit"
-                class="w-full bg-gradient-to-r from-[#FBBF24] to-[#D97706] text-black font-bold py-4 rounded-2xl">
-                Sign In
-            </button>
+                <!-- Terms -->
+                <label class="flex items-start gap-2 text-sm text-gray-500 mt-2">
+                    <input type="checkbox" required class="mt-1 rounded text-yellow-500 focus:ring-yellow-400">
+                    <span>
+                        I agree to the
+                        <a href="#" class="text-yellow-500 font-semibold hover:underline">Terms</a>
+                        and
+                        <a href="#" class="text-yellow-500 font-semibold hover:underline">Privacy Policy</a>
+                    </span>
+                </label>
 
+                <!-- Submit -->
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-yellow-400 to-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
+                    Create My Account
+                </button>
             </form>
 
-            <p class="text-center text-[#FBBF24] text-sm mt-6">
+            <!-- Divider -->
+            <div class="relative my-8">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-white text-gray-400">Or sign up with</span>
+                </div>
+            </div>
+
+            <!-- Social -->
+            <div class="flex gap-4">
+                <button class="flex-1 flex items-center justify-center py-3 border border-gray-200 rounded-xl hover:bg-gray-100 transition">
+                    <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5 mr-2">
+                    <span class="text-sm font-semibold text-gray-600">Google</span>
+                </button>
+                <button class="flex-1 flex items-center justify-center py-3 border border-gray-200 rounded-xl hover:bg-gray-100 transition">
+                    <i class="fab fa-facebook text-blue-600 text-xl mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600">Facebook</span>
+                </button>
+            </div>
+
+            <p class="text-center text-gray-500 text-sm mt-8">
                 Already have an account?
-                <a href="{% url 'login' %}" class="text-gray-100 font-bold">Login</a>
+                <a href="{% url 'login' %}" class="text-yellow-500 font-bold hover:underline">
+                    Sign In
+                </a>
             </p>
 
         </div>
     </div>
 </div>
+
+<script>
+function togglePassword(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector("i");
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+    }
+}
+</script>
 {% endblock %}

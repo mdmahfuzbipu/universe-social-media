@@ -15,9 +15,16 @@
     {% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-[#0B0B0F] h-screen overflow-hidden">
-    {% block content %}{% endblock %}
+<body
+    class="min-h-screen bg-no-repeat bg-center bg-cover"
+    style="background-image: url('{% static 'images/background.png' %}');"
+>
 
+
+    
+    {% block content %}{% endblock %}
+ 
+    
     {% block script %}{% endblock %}
 </body>
 </html>

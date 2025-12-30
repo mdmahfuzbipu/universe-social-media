@@ -1,70 +1,85 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    
+    <title>{% block title %}UniVerse{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'universe/main.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <title>UniVerse | {% block title %}{% endblock %}</title>
+    <!-- Custom Font (optional but modern) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center" href="{% url 'login' %}">
-      <img src="{% static 'images/universe-logo.png' %}" width="40" height="40" class="d-inline-block align-top mr-2" alt="UniVerse Logo">
-      <span class="font-weight-bold">UniVerse</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<body class="bg-[#fdf8ff] text-gray-800">
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+<!-- 🔶 NAVBAR -->
+<header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
 
-<!-- MAIN CONTENT -->
-<main class="container my-5">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <img src="{% static 'images/universe-logo.png' %}" alt="UniVerse" class="w-10 h-10">
+                <span class="text-xl font-extrabold text-gray-800">
+                    Uni<span class="text-yellow-500">Verse</span>
+                </span>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-6">
+
+                <!-- Profile -->
+                <div class="relative group">
+                    <button class="flex items-center gap-2 focus:outline-none">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-600 flex items-center justify-center text-black font-bold">
+                            {{ request.user.username|first|upper }}
+                        </div>
+                        <i class="fas fa-chevron-down text-sm text-gray-400"></i>
+                    </button>
+
+                    <!-- Dropdown -->
+                    <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                        <a href="{% url 'profile' %}" class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                            <i class="fas fa-user mr-2"></i> Profile
+                        </a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
         </div>
-      {% endfor %}
-    {% endif %}
+    </div>
+</header>
 
-    {% block content %}{% endblock %}
+<!-- 🟡 MAIN CONTENT -->
+<main class="max-w-7xl mx-auto px-6 py-10">
+    {% block content %}
+    {% endblock %}
 </main>
 
-<!-- SCRIPTS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
-{% block script %}{% endblock %}
+<!-- 🔻 FOOTER -->
+<footer class="mt-20 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
+        © {{ now|date:"Y" }} UniVerse · Built with ❤️ by MIRSTN
+    </div>
+</footer>
 
 </body>
 </html>
