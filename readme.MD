@@ -273,7 +273,7 @@ This project has been developed by a dedicated team of **BAUET students**:
 | [Mst. Rizoana Khatun](https://www.linkedin.com/in/your-linkedin/) | Backend |
 | [Nafis Shahriar](https://www.linkedin.com/in/your-linkedin/) | Backend |
 
-All team members are **students of Bangladesh Army University of Engineering & Technology**, collaborating to build this social media platform for learning and practice.
+All team members are **students of Bangladesh Army University of Engineering & Technology**, collaborating to build this social media platform.
 
 ---
 
