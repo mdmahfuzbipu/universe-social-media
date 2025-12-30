@@ -267,8 +267,8 @@ This project has been developed by a dedicated team of **BAUET students**:
 | Name | Stack / Role |
 |------|--------------|
 | [Md Mahfuz Hossain](https://www.linkedin.com/in/muhammadmahfuzhossain/) | Full Stack |
-| [Tirtho Saha](https://www.linkedin.com/in/your-linkedin/) | Frontend |
-| [Israt Binte Elias](https://www.linkedin.com/in/your-linkedin/) | Frontend |
+| [Tirtho Saha](https://www.linkedin.com/in/tirtho-saha-612b47265/) | Frontend |
+| [Israt Binte Elias](https://www.linkedin.com/in/israt-binte-elias-445a98257/) | Frontend |
 | [Sabrina Binty Akhtar](https://www.linkedin.com/in/sabrina-binty-akhtar-7617a1264) | Backend |
 | [Mst. Rizoana Khatun](https://www.linkedin.com/in/your-linkedin/) | Backend |
 | [Nafis Shahriar](https://www.linkedin.com/in/your-linkedin/) | Backend |
