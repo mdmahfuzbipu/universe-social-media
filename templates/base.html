@@ -51,10 +51,10 @@
 
                     <!-- Dropdown -->
                     <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                        <a href="{% url 'profile' %}" class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                        <a href="{% url 'accounts:my_profile' %}" class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
-                        <form method="post" action="{% url 'logout' %}">
+                        <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout

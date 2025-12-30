@@ -7,3 +7,4 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         import accounts.signals
+        # This ensures that the signals are imported and registered when the app is ready.
