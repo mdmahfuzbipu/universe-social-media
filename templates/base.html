@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Custom Font (optional but modern) -->
+    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -24,39 +24,46 @@
 
 <body class="bg-[#fdf8ff] text-gray-800">
 
-<!-- 🔶 NAVBAR -->
-<header class="sticky top-0 z-50 bg-white shadow-sm">
+<!-- ================= NAVBAR ================= -->
+<header class="sticky top-0 z-50 bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] shadow-md">
     <div class="max-w-7xl mx-auto px-6">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between h-16 md:h-18">
 
-            <!-- Logo -->
-            <div class="flex items-center gap-3">
-                <img src="{% static 'images/universe-logo.png' %}" alt="UniVerse" class="w-10 h-10">
-                <span class="text-xl font-extrabold text-gray-800">
-                    Uni<span class="text-yellow-500">Verse</span>
-                </span>
-            </div>
+            <!-- Bigger Logo -->
+            <a href="/" class="flex items-center">
+                <img src="{% static 'images/universe-logo.png' %}"
+                     alt="UniVerse"
+                      class="h-24 md:h-32 w-auto">
+            </a>
 
             <!-- Right Actions -->
             <div class="flex items-center gap-6">
 
-                <!-- Profile -->
+                <!-- Profile Dropdown -->
                 <div class="relative group">
                     <button class="flex items-center gap-2 focus:outline-none">
-                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-600 flex items-center justify-center text-black font-bold">
-                            {{ request.user.username|first|upper }}
-                        </div>
-                        <i class="fas fa-chevron-down text-sm text-gray-400"></i>
+                        <img
+                            src="{% if request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
+                            class="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+                            alt="Profile"
+                        >
+                        <i class="fas fa-chevron-down text-sm text-white/80"></i>
                     </button>
 
                     <!-- Dropdown -->
-                    <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                        <a href="{% url 'accounts:my_profile' %}" class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                    <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
+                                opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                                transition-all duration-200">
+
+                        <a href="{% url 'accounts:my_profile' %}"
+                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
+
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
-                            <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
+                            <button type="submit"
+                                    class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
@@ -68,16 +75,39 @@
     </div>
 </header>
 
-<!-- 🟡 MAIN CONTENT -->
+<!-- ================= MAIN ================= -->
 <main class="max-w-7xl mx-auto px-6 py-10">
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock %}
 </main>
 
-<!-- 🔻 FOOTER -->
-<footer class="mt-20 border-t border-gray-200">
-    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
-        © {{ now|date:"Y" }} UniVerse · Built with ❤️ by MIRSTN
+<!-- ================= FOOTER ================= -->
+<footer class="bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706]
+               border-t border-yellow-300">
+
+    <div class="max-w-7xl mx-auto px-1
+                flex items-center justify-between
+                py-1">
+
+        <!-- Logo + Copyright -->
+        <div class="flex items-center gap-2 leading-none">
+            <img src="{% static 'images/universe-logo.png' %}"
+                 alt="UniVerse Logo"
+                 class="h-24 md:h-32 w-auto object-contain">
+
+            <span class="text-xs text-black/80 leading-none">
+                © {% now "Y" %} UniVerse
+            </span>
+        </div>
+
+        <!-- Footer Links -->
+        <nav class="flex items-center gap-5 text-sm text-black/80 leading-none">
+            <a href="#" class="hover:text-black transition">About</a>
+            <a href="#" class="hover:text-black transition">Help</a>
+            <a href="#" class="hover:text-black transition">Terms</a>
+            <a href="#" class="hover:text-black transition">Privacy</a>
+            <a href="#" class="hover:text-black transition">Contact</a>
+        </nav>
+
     </div>
 </footer>
 
