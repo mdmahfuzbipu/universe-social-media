@@ -1,0 +1,113 @@
+{% extends "auth_base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center">
+
+    <div class="flex w-full max-w-5xl h-[650px] bg-white rounded-[3rem] shadow-2xl overflow-hidden m-4">
+
+        <!-- LEFT PANEL -->
+        <div class="hidden md:flex w-1/2 bg-gradient-to-tr from-[#FBBF24] via-[#F59E0B] to-[#D97706] p-12 flex-col justify-between relative overflow-hidden">
+            
+            <!-- Decorative floating circles -->
+            <div class="absolute top-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-xl animate-[float_6s_ease-in-out_infinite]"></div>
+            <div class="absolute bottom-20 right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl animate-[float_8s_ease-in-out_infinite] animate-delay-2000"></div>
+
+            <div>
+                <img src="{% static 'images/universe-logo.png' %}" class="w-48 mb-6" alt="UniVerse Logo">
+                <h1 class="text-4xl font-extrabold text-white leading-snug">
+                    Explore the<br>UniVerse..!
+                </h1>
+                <p class="text-black/80 mt-4 font-semibold text-lg">Connect with friends, share your world, and discover new galaxies of content.</p>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="w-full md:w-1/2 p-12 flex flex-col justify-center">
+
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+            <p class="text-gray-500 mb-8">Sign in to your account</p>
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ field.label }}</label>
+                    <div class="relative">
+                        {% if field.name == 'username' %}
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-yellow-300 outline-none transition-all"|attr:"placeholder:Enter your username" }}
+                        {% elif field.name == 'password' %}
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ field|add_class:"w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-yellow-300 outline-none transition-all"|attr:"placeholder:Enter your password" }}
+                        <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-500 transition-colors">
+                            <i class="far fa-eye" id="eyeIcon"></i>
+                        </button>
+                        {% else %}
+                        {{ field }}
+                        {% endif %}
+                    </div>
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                <!-- Remember Me + Forgot Password -->
+                <div class="flex items-center justify-between mt-2 text-sm">
+                    <label class="flex items-center gap-2 text-gray-600">
+                        <input type="checkbox" class="rounded text-yellow-500 focus:ring-yellow-400">
+                        Remember me
+                    </label>
+                    <a href="{% url 'accounts:password_reset' %}" class="font-medium text-yellow-500 hover:underline">Forgot password?</a>
+                </div>
+
+                <!-- Log In Button -->
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-yellow-400 to-orange-600 text-white font-bold py-4 rounded-2xl shadow-md hover:opacity-90 transition-all">
+                    Log In
+                </button>
+            </form>
+
+            <!-- Or continue with -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                <div class="relative flex justify-center text-sm"><span class="px-3 bg-white text-gray-400">Or continue with</span></div>
+            </div>
+
+            <div class="flex gap-4">
+                <button class="flex-1 flex items-center justify-center py-3 border border-gray-200 rounded-xl hover:bg-gray-100 transition">
+                    <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5 mr-2" alt="Google">
+                    <span class="text-gray-700 font-medium text-sm">Google</span>
+                </button>
+                <button class="flex-1 flex items-center justify-center py-3 border border-gray-200 rounded-xl hover:bg-gray-100 transition">
+                    <i class="fab fa-facebook text-blue-600 text-xl mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600">Facebook</span>
+                </button>
+            </div>
+
+            <p class="text-center text-gray-500 text-sm mt-8">
+                Don't have an account? 
+                <a href="{% url 'accounts:register' %}" class="text-yellow-500 font-semibold hover:underline">Create Account</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<script>
+const toggleBtn = document.querySelector('#togglePassword');
+const passwordInput = document.querySelector('input[name="password"]');
+const eyeIcon = document.querySelector('#eyeIcon');
+
+toggleBtn?.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    eyeIcon.classList.toggle('fa-eye');
+    eyeIcon.classList.toggle('fa-eye-slash');
+});
+</script>
+{% endblock %}

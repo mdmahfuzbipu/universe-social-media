@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="flex items-center gap-6 mb-8">
+    <img src="{{ profile.avatar.url }}" class="w-24 h-24 rounded-full object-cover border">
+    <div>
+      <h1 class="text-2xl font-semibold">{{ profile_user.username }}</h1>
+      <p class="text-gray-500">Edit your profile information</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-6">
+    {% csrf_token %}
+
+    <!-- Media -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Avatar</label>
+        {{ form.avatar|add_class:"block w-full text-sm" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Cover Photo</label>
+        {{ form.cover_photo|add_class:"block w-full text-sm" }}
+      </div>
+    </div>
+
+    <!-- Identity -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Full Name</label>
+        {{ form.full_name|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Date of Birth</label>
+        {{ form.date_of_birth|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+    </div>
+
+    <!-- Bio -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Bio</label>
+      {{ form.bio|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <!-- Personal -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Location</label>
+        {{ form.location|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Website</label>
+        {{ form.website|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+    </div>
+
+    <!-- Professional -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Education</label>
+      {{ form.education|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Experience</label>
+      {{ form.experience|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Skills</label>
+      {{ form.skills|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <!-- Submit -->
+    <div class="flex justify-end">
+      <button class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+        Save Changes
+      </button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
