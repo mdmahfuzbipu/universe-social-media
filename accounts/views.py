@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
+from interactions.models import Follow
 from .models import Profile
 from .forms import UserRegisterForm, ProfileUpdateForm  
 
@@ -29,13 +30,26 @@ def register(request):
 def profile_detail(request, username):
     user = get_object_or_404(User, username=username)
     profile, created = Profile.objects.get_or_create(user=user)
+    
+    followers_count = Follow.objects.filter(following=user).count()
+    following_count = Follow.objects.filter(follower=user).count()
+    
+    is_following = False
+    if request.user.is_authenticated:
+        is_following = Follow.objects.filter(
+            follower=request.user,
+            following=user
+        ).exists()
+
     context = {
         "profile_user": user,
         "profile": profile,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
     }
 
     return render(request, "accounts/profile_detail.html", context)
-
 
 @login_required
 def my_profile(request):
