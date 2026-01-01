@@ -30,10 +30,10 @@ def register(request):
 def profile_detail(request, username):
     user = get_object_or_404(User, username=username)
     profile, created = Profile.objects.get_or_create(user=user)
-    
+
     followers_count = Follow.objects.filter(following=user).count()
     following_count = Follow.objects.filter(follower=user).count()
-    
+
     is_following = False
     if request.user.is_authenticated:
         is_following = Follow.objects.filter(
@@ -50,6 +50,33 @@ def profile_detail(request, username):
     }
 
     return render(request, "accounts/profile_detail.html", context)
+
+
+def followers_list(request, username):
+    user = get_object_or_404(User, username=username)
+
+    followers = Follow.objects.filter(following=user).select_related("follower")
+
+    context = {
+        "profile_user": user,
+        "users": [f.follower for f in followers],
+        "list_type": "Followers",
+    }
+    return render(request, "accounts/follow_list.html", context)
+
+
+def following_list(request, username):
+    user = get_object_or_404(User, username=username)
+
+    following = Follow.objects.filter(follower=user).select_related("following")
+
+    context = {
+        "profile_user": user,
+        "users": [f.following for f in following],
+        "list_type": "Following",
+    }
+    return render(request, "accounts/follow_list.html", context)
+
 
 @login_required
 def my_profile(request):
