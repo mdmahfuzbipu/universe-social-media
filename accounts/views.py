@@ -21,9 +21,9 @@ def register(request):
     return render(request, "auth/register.html", {"form": form})
 
 
-@login_required
-def home(request):
-    return render(request, "accounts/home.html")
+# @login_required
+# def home(request):
+#     return render(request, "accounts/home.html")
 
 
 def profile_detail(request, username):
