@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
 from .models import Profile
-from .forms import UserRegisterForm  # ProfileUpdateForm
+from .forms import UserRegisterForm, ProfileUpdateForm  
 
 User = get_user_model()
 
@@ -41,9 +41,18 @@ def profile_detail(request, username):
 def my_profile(request):
     profile = request.user.profile
 
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect("accounts:my_profile")
+    else:
+        form = ProfileUpdateForm(instance=profile)
+
     context = {
         "profile_user": request.user,
         "profile": profile,
+        "form": form,
     }
-
     return render(request, "accounts/my_profile.html", context)

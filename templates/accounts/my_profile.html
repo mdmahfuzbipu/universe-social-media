@@ -1,56 +1,90 @@
 {% extends "base.html" %}
 {% load static %}
+{% load widget_tweaks %}
+
 {% block title %}My Profile{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto mt-6">
+<div class="max-w-5xl mx-auto px-4 py-8">
 
-    <!-- COVER -->
-    <div class="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
-        <img
-            src="{% if request.user.profile.cover_photo %}{{ request.user.profile.cover_photo.url }}{% else %}{% static 'images/default-cover.png' %}{% endif %}"
-            class="w-full h-full object-cover"
-        >
+  <!-- Header -->
+  <div class="flex items-center gap-6 mb-8">
+    <img src="{{ profile.avatar.url }}" class="w-24 h-24 rounded-full object-cover border">
+    <div>
+      <h1 class="text-2xl font-semibold">{{ profile_user.username }}</h1>
+      <p class="text-gray-500">Edit your profile information</p>
+    </div>
+  </div>
 
-        <!-- Change Cover -->
-        <a href="#"
-           class="absolute bottom-4 right-4 bg-white/90 px-4 py-2 rounded-xl shadow hover:bg-white transition text-sm font-medium">
-            Change Cover
-        </a>
+  <!-- Form -->
+  <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-6">
+    {% csrf_token %}
+
+    <!-- Media -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Avatar</label>
+        {{ form.avatar|add_class:"block w-full text-sm" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Cover Photo</label>
+        {{ form.cover_photo|add_class:"block w-full text-sm" }}
+      </div>
     </div>
 
-    <!-- HEADER -->
-    <div class="relative bg-white rounded-2xl shadow-lg px-6 pb-6 -mt-20">
-
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between">
-
-            <!-- Avatar -->
-            <div class="flex items-center">
-                <div class="relative">
-                    <img
-                        src="{% if request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
-                        class="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover"
-                    >
-                    <a href="#"
-                       class="absolute bottom-1 right-1 bg-blue-600 text-white p-2 rounded-full shadow hover:bg-blue-700 transition">
-                        ✎
-                    </a>
-                </div>
-
-                <div class="ml-6">
-                    <h2 class="text-3xl font-bold">{{ request.user.profile.full_name|default:request.user.username }}</h2>
-                    <p class="text-gray-500">{{ request.user.profile.bio }}</p>
-                </div>
-            </div>
-
-            <!-- ACTION -->
-            <a href="{% url 'accounts:login' %}"
-               class="mt-6 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-xl font-medium
-                      hover:bg-blue-700 transition shadow">
-                Edit Profile
-            </a>
-        </div>
+    <!-- Identity -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Full Name</label>
+        {{ form.full_name|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Date of Birth</label>
+        {{ form.date_of_birth|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
     </div>
+
+    <!-- Bio -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Bio</label>
+      {{ form.bio|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <!-- Personal -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Location</label>
+        {{ form.location|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Website</label>
+        {{ form.website|add_class:"w-full px-3 py-2 border rounded-lg" }}
+      </div>
+    </div>
+
+    <!-- Professional -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Education</label>
+      {{ form.education|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Experience</label>
+      {{ form.experience|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Skills</label>
+      {{ form.skills|add_class:"w-full px-3 py-2 border rounded-lg" }}
+    </div>
+
+    <!-- Submit -->
+    <div class="flex justify-end">
+      <button class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+        Save Changes
+      </button>
+    </div>
+  </form>
 
 </div>
 {% endblock %}
