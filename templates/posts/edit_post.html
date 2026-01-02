@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-6">
+
+  <h2 class="text-xl font-semibold mb-4">Edit Post</h2>
+
+  <form method="POST" enctype="multipart/form-data"
+        class="bg-white p-4 rounded-xl shadow space-y-3">
+    {% csrf_token %}
+
+    {{ form.content|add_class:"w-full border rounded-lg px-3 py-2" }}
+    {{ form.image }}
+
+    <div class="flex justify-end gap-3">
+      <a href="{% url 'posts:feed' %}" class="text-gray-500">
+        Cancel
+      </a>
+      <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">
+        Update
+      </button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

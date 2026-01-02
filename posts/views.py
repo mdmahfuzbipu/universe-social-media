@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
+
 
 from interactions.models import Follow
 from .models import Post
@@ -41,3 +43,36 @@ def create_post(request):
             post.author = request.user
             post.save()
     return redirect("posts:feed")
+
+
+@login_required
+def edit_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Authorization check
+    if post.author != request.user:
+        return HttpResponseForbidden("You are not allowed to edit this post.")
+
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect("posts:feed")
+    else:
+        form = PostForm(instance=post)
+
+    return render(request, "posts/edit_post.html", {"form": form, "post": post})
+
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.author != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this post.")
+
+    if request.method == "POST":
+        post.delete()
+        return redirect("posts:feed")
+
+    return render(request, "posts/confirm_delete.html", {"post": post})

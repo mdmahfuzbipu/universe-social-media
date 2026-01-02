@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 
+from posts.models import Post
 from interactions.models import Follow
 from .models import Profile
 from .forms import UserRegisterForm, ProfileUpdateForm  
@@ -37,9 +39,15 @@ def profile_detail(request, username):
     is_following = False
     if request.user.is_authenticated:
         is_following = Follow.objects.filter(
-            follower=request.user,
-            following=user
+            follower=request.user, following=user
         ).exists()
+
+    # USER POSTS
+    posts_qs = Post.objects.filter(author=user).select_related("author")
+
+    paginator = Paginator(posts_qs, 5)  # 5 posts per page
+    page_number = request.GET.get("page")
+    posts = paginator.get_page(page_number)
 
     context = {
         "profile_user": user,
@@ -47,6 +55,7 @@ def profile_detail(request, username):
         "followers_count": followers_count,
         "following_count": following_count,
         "is_following": is_following,
+        "posts": posts,  
     }
 
     return render(request, "accounts/profile_detail.html", context)
