@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-6 space-y-6">
+
+  <!-- Create Post -->
+  <form method="POST" enctype="multipart/form-data"
+        action="{% url 'posts:create_post' %}"
+        class="bg-white rounded-xl shadow p-4 space-y-3">
+    {% csrf_token %}
+    {{ form.content|add_class:"w-full border rounded-lg px-3 py-2" }}
+    {{ form.image }}
+    <div class="text-right">
+      <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">
+        Post
+      </button>
+    </div>
+  </form>
+
+  <!-- Feed -->
+  {% for post in page_obj %}
+  <div class="bg-white rounded-xl shadow p-4 space-y-3">
+    <div class="flex items-center gap-3">
+      <img src="{{ post.author.profile.avatar.url }}"
+           class="w-10 h-10 rounded-full object-cover">
+      <div>
+        <p class="font-medium">{{ post.author.username }}</p>
+        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+      </div>
+    </div>
+
+    <p class="text-gray-800">{{ post.content }}</p>
+
+    {% if post.image %}
+      <img src="{{ post.image.url }}" class="rounded-lg">
+    {% endif %}
+  </div>
+  {% empty %}
+    <p class="text-center text-gray-500">No posts yet.</p>
+  {% endfor %}
+
+  <!-- Pagination -->
+  <div class="flex justify-center gap-4">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="text-indigo-600">
+        Previous
+      </a>
+    {% endif %}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="text-indigo-600">
+        Next
+      </a>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
