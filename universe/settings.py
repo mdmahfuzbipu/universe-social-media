@@ -122,9 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LOGIN_URL = "login"
+LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "/accounts/profile/me/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = "accounts:login"
 
 
 # Internationalization
