@@ -162,7 +162,65 @@
     <!-- POSTS -->
     <div class="mt-10">
         <h3 class="text-lg font-semibold mb-4">Posts</h3>
-        <p class="text-gray-500">No posts yet.</p>
+
+        {% for post in posts %}
+            <div class="bg-white rounded-xl shadow p-4 mb-4 space-y-3">
+
+                <div class="flex items-center gap-3">
+                    <img src="{{ post.author.profile.avatar.url }}"
+                        class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <p class="font-medium">{{ post.author.username }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ post.created_at|timesince }} ago
+                        </p>
+                    </div>
+                </div>
+
+                <p class="text-gray-800">{{ post.content }}</p>
+
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="rounded-lg">
+                {% endif %}
+
+                {% if request.user == post.author %}
+                    <div class="flex gap-4 text-sm text-gray-500">
+                        <a href="{% url 'posts:edit_post' post.id %}"
+                        class="hover:text-indigo-600">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                            action="{% url 'posts:delete_post' post.id %}">
+                            {% csrf_token %}
+                            <button class="hover:text-red-600"
+                                    onclick="return confirm('Delete this post?')">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% empty %}
+            <p class="text-gray-500">No posts yet.</p>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div class="flex justify-center gap-4 mt-6">
+            {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}"
+                class="text-indigo-600">
+                    Previous
+                </a>
+            {% endif %}
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}"
+                class="text-indigo-600">
+                    Next
+                </a>
+            {% endif %}
+        </div>
     </div>
 
 </div>
