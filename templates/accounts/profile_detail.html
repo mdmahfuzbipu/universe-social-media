@@ -57,8 +57,9 @@
                 {# MESSAGE BUTTON (future feature) #}
                 {% if request.user.is_authenticated and request.user != profile_user %}
                 <button
-                    class="px-5 py-2 rounded-xl bg-gray-100 text-gray-800 font-medium
-                           hover:bg-gray-200 transition shadow">
+                    class="px-5 py-2 rounded-xl bg-green-600 text-white font-medium
+                        hover:bg-green-700 transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
                     Message
                 </button>
                 {% endif %}
@@ -66,8 +67,10 @@
                 {# EDIT PROFILE BUTTON (only own profile) #}
                 {% if request.user == profile_user %}
                 <a href="{% url 'accounts:my_profile' %}"
-                   class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-medium
-                          hover:bg-indigo-700 transition shadow">
+                class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-medium
+                        hover:bg-indigo-700 transition shadow
+                        flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
                     Edit Profile
                 </a>
                 {% endif %}
@@ -100,13 +103,21 @@
             <!-- FOLLOW / UNFOLLOW -->
             {% if request.user.is_authenticated and request.user != profile_user %}
                 <a href="{% url 'interactions:follow_toggle' profile_user.username %}"
-                   class="mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow
-                   {% if is_following %}
-                        bg-gray-200 text-gray-700 hover:bg-gray-300
-                   {% else %}
-                        bg-indigo-600 text-white hover:bg-indigo-700
-                   {% endif %}">
-                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                class="mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow
+                flex items-center gap-2
+                {% if is_following %}
+                        bg-red-600 text-white hover:bg-red-700
+                {% else %}
+                        bg-blue-600 text-white hover:bg-blue-700
+                {% endif %}">
+                
+                    {% if is_following %}
+                        <i class="fa-solid fa-user-minus"></i>
+                        Unfollow
+                    {% else %}
+                        <i class="fa-solid fa-user-plus"></i>
+                        Follow
+                    {% endif %}
                 </a>
             {% endif %}
 
