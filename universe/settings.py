@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "/accounts/profile/me/"
+LOGIN_REDIRECT_URL = "/posts/feed/"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 
