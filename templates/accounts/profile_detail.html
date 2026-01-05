@@ -57,8 +57,8 @@
                 {# MESSAGE BUTTON (future feature) #}
                 {% if request.user.is_authenticated and request.user != profile_user %}
                 <button
-                    class="px-5 py-2 rounded-xl bg-green-600 text-white font-medium
-                        hover:bg-green-700 transition shadow flex items-center gap-2">
+                    class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white font-medium
+                        hover:bg-orange-900 transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane"></i>
                     Message
                 </button>
@@ -67,8 +67,8 @@
                 {# EDIT PROFILE BUTTON (only own profile) #}
                 {% if request.user == profile_user %}
                 <a href="{% url 'accounts:my_profile' %}"
-                class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-medium
-                        hover:bg-indigo-700 transition shadow
+                class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium
+                        hover:bg-orange-700 transition shadow
                         flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square"></i>
                     Edit Profile
@@ -84,9 +84,10 @@
             <div class="flex items-center gap-8 text-center justify-center md:justify-start">
 
                 <a href="{% url 'accounts:followers_list' profile_user.username %}">
-                    <p class="text-lg font-semibold text-gray-900 hover:underline">
-                        {{ followers_count }}
-                    </p>
+                <p id="followers-count-{{ profile_user.username }}" class="text-lg font-semibold text-gray-900 hover:underline">
+                    {{ followers_count }}
+                </p>
+
                     <p class="text-sm text-gray-500">Followers</p>
                 </a>
 
@@ -102,24 +103,26 @@
 
             <!-- FOLLOW / UNFOLLOW -->
             {% if request.user.is_authenticated and request.user != profile_user %}
-                <a href="{% url 'interactions:follow_toggle' profile_user.username %}"
-                class="mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow
-                flex items-center gap-2
-                {% if is_following %}
-                        bg-red-600 text-white hover:bg-red-700
-                {% else %}
-                        bg-blue-600 text-white hover:bg-blue-700
-                {% endif %}">
-                
+            <button type="button"
+                    class="follow-btn mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow flex items-center gap-2
+                        {% if is_following %}
+                            bg-red-600 text-white hover:bg-red-700
+                        {% else %}
+                            bg-blue-600 text-white hover:bg-blue-700
+                        {% endif %}"
+                    data-username="{{ profile_user.username }}"
+                    data-following="{{ is_following|yesno:'true,false' }}">
+
+                <span class="flex items-center gap-1">
                     {% if is_following %}
-                        <i class="fa-solid fa-user-minus"></i>
-                        Unfollow
+                        <i class="fa-solid fa-user-minus"></i> Unfollow
                     {% else %}
-                        <i class="fa-solid fa-user-plus"></i>
-                        Follow
+                        <i class="fa-solid fa-user-plus"></i> Follow
                     {% endif %}
-                </a>
+                </span>
+            </button>
             {% endif %}
+
 
         </div>
     </div>

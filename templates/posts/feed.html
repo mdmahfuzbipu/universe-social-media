@@ -2,21 +2,65 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto py-6 space-y-6">
+<div class="max-w-7xl mx-auto py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+
+<!-- Left Side existing feed content -->
+<div class="lg:col-span-2 space-y-6">
   <!-- Create Post -->
-  <form method="POST" enctype="multipart/form-data"
+  <form method="POST"
+        enctype="multipart/form-data"
         action="{% url 'posts:create_post' %}"
-        class="bg-white rounded-xl shadow p-4 space-y-3">
+        class="bg-white rounded-xl shadow p-4 space-y-4">
     {% csrf_token %}
-    {{ form.content|add_class:"w-full border rounded-lg px-3 py-2" }}
-    {{ form.image }}
-    <div class="text-right">
-      <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">
+
+    <!-- Top Row: Avatar + Textarea -->
+    <div class="flex items-start gap-3">
+
+      <!-- Avatar -->
+      <img
+        src="{{ request.user.profile.avatar.url }}"
+        class="w-10 h-10 rounded-full object-cover"
+        alt="avatar"
+      >
+
+      <!-- Content -->
+      {{ form.content|add_class:"w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-orange-400 focus:outline-none" }}
+    </div>
+
+    <!-- IMAGE PREVIEW (IMPORTANT) -->
+    <div id="image-preview" class="hidden">
+      <img id="preview-img"
+          class="max-h-64 rounded-xl border object-contain" />
+    </div>
+
+    <!-- IMAGE ERROR MESSAGE -->
+    <p id="image-error"
+      class="hidden text-sm text-red-500 mt-1">
+    </p>
+
+    <!-- Bottom Row -->
+    <div class="flex items-center justify-between pt-2 border-t">
+
+      <!-- Upload -->
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-orange-500">
+        <i class="fa-regular fa-image"></i>
+        <span>Photo</span>
+
+        <!-- FILE INPUT (HIDDEN BUT HAS ID) -->
+        {{ form.image|add_class:"hidden"|attr:"id:post-image-input" }}
+      </label>
+
+      <!-- Post -->
+      <button
+        type="submit"
+        class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-medium transition">
         Post
       </button>
     </div>
   </form>
+
+
 
   <!-- Feed -->
 {% for post in page_obj %}
@@ -156,5 +200,53 @@
     {% endif %}
   </div>
 
+
 </div>
+
+
+  <!-- Right Sidebar Suggestions -->
+
+  <div class="hidden lg:block">
+    {% include "accounts/suggestions.html" %}
+  </div>
+
+
+
+</div>
+
+<script>
+document.addEventListener("change", function (e) {
+    if (e.target.id !== "post-image-input") return;
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const previewWrapper = document.getElementById("image-preview");
+    const previewImg = document.getElementById("preview-img");
+    const errorMsg = document.getElementById("image-error");
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+    // Reset UI
+    errorMsg.classList.add("hidden");
+    previewWrapper.classList.add("hidden");
+    previewImg.src = "";
+
+    // Invalid file type
+    if (!allowedTypes.includes(file.type)) {
+        errorMsg.textContent =
+            "Unsupported image format. Please select JPG, JPEG, PNG, or WEBP.";
+        errorMsg.classList.remove("hidden");
+        e.target.value = ""; // reset file input
+        return;
+    }
+
+    // Valid image
+    previewImg.src = URL.createObjectURL(file);
+    previewWrapper.classList.remove("hidden");
+});
+</script>
+
+
+
 {% endblock %}

@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 
 from posts.models import Post
 from interactions.models import Follow
@@ -115,9 +115,20 @@ def search(request):
 
     users = []
     if query:
-        users = User.objects.filter(
-            Q(username__icontains=query) | Q(profile__full_name__icontains=query)
-        ).select_related("profile")
+        users = (
+            User.objects.filter(
+                Q(username__icontains=query) | Q(profile__full_name__icontains=query)
+            )
+            .exclude(id=request.user.id)
+            .select_related("profile")
+            .annotate(
+                is_following=Exists(
+                    Follow.objects.filter(
+                        follower=request.user, following=OuterRef("pk")
+                    )
+                )
+            )
+        )
 
     context = {
         "query": query,
