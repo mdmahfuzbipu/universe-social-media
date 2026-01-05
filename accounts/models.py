@@ -16,7 +16,7 @@ class Profile(models.Model):
     avatar = models.ImageField(
         upload_to="profiles/avatars/", default="profiles/default-avatar.png", blank=True
     )
-    cover_photo = models.ImageField(upload_to="profiles/covers/", default="profiles/default-cover.jpg", null=True, blank=True)
+    cover_photo = models.ImageField(upload_to="profiles/covers/", default="profiles/default-cover.png", null=True, blank=True)
 
     # IDENTITY
     full_name = models.CharField(max_length=150, blank=True)

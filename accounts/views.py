@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from posts.models import Post
 from interactions.models import Follow
@@ -106,3 +107,20 @@ def my_profile(request):
         "form": form,
     }
     return render(request, "accounts/my_profile.html", context)
+
+
+@login_required
+def search(request):
+    query = request.GET.get("q", "").strip()
+
+    users = []
+    if query:
+        users = User.objects.filter(
+            Q(username__icontains=query) | Q(profile__full_name__icontains=query)
+        ).select_related("profile")
+
+    context = {
+        "query": query,
+        "users": users,
+    }
+    return render(request, "accounts/search_results.html", context)
