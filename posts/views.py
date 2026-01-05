@@ -19,7 +19,12 @@ def feed(request):
     # include own posts
     posts = Post.objects.filter(
         author__in=list(following_users) + [request.user.id]
-    ).select_related("author")
+    ).select_related(
+        "author",
+        "original_post",
+        "original_post__author"
+    )
+
 
     paginator = Paginator(posts, 10)  # 10 posts per page
     page_number = request.GET.get("page")
@@ -76,3 +81,16 @@ def delete_post(request, post_id):
         return redirect("posts:feed")
 
     return render(request, "posts/confirm_delete.html", {"post": post})
+
+
+@login_required
+def share_post(request, post_id):
+    original = get_object_or_404(Post, id=post_id)
+
+    # prevent duplicate share
+    if Post.objects.filter(author=request.user, original_post=original).exists():
+        return redirect("posts:feed")
+
+    Post.objects.create(author=request.user, original_post=original)
+
+    return redirect("posts:feed")

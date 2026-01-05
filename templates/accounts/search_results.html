@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Search Users{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-6">
+
+  <h2 class="text-xl font-semibold mb-4">
+    Search results for "{{ query }}"
+  </h2>
+
+  {% for user in users %}
+    <a href="{% url 'accounts:profile_detail' user.username %}"
+       class="flex items-center gap-4 p-3 bg-white rounded-xl shadow mb-3
+              hover:bg-gray-50 transition">
+
+      <img src="{{ user.profile.avatar.url }}"
+           class="w-12 h-12 rounded-full object-cover">
+
+      <div>
+        <p class="font-medium">{{ user.username }}</p>
+        {% if user.profile.full_name %}
+          <p class="text-sm text-gray-500">
+            {{ user.profile.full_name }}
+          </p>
+        {% endif %}
+      </div>
+    </a>
+  {% empty %}
+    <p class="text-gray-500">No users found.</p>
+  {% endfor %}
+
+</div>
+{% endblock %}

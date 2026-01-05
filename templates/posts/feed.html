@@ -19,18 +19,58 @@
   </form>
 
   <!-- Feed -->
-  {% for post in page_obj %}
-  <div class="bg-white rounded-xl shadow p-4 space-y-3">
-    <div class="flex items-center gap-3">
-      
-      <a href="{% url 'accounts:profile_detail' request.user.username %}">
-        <img src="{{ post.author.profile.avatar.url }}"
-        class="w-10 h-10 rounded-full object-cover">
-        <div>
-          <p class="font-medium">{{ post.author.username }}</p>
+{% for post in page_obj %}
+<div class="bg-white rounded-xl shadow p-4 space-y-3">
+
+  {% if post.original_post %}
+    <!-- SHARED POST HEADER -->
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+      <img src="{{ post.author.profile.avatar.url }}"
+          class="w-6 h-6 rounded-full object-cover">
+
+      <a href="{% url 'accounts:profile_detail' post.author.username %}"
+        class="font-medium text-gray-700 hover:underline">
+        {{ post.author.username }}
       </a>
 
-        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+      <span>shared this post</span>
+    </div>
+
+
+    <div class="border rounded-lg p-3 bg-gray-50 space-y-2">
+      <div class="flex items-center gap-2">
+        <img src="{{ post.original_post.author.profile.avatar.url }}"
+             class="w-8 h-8 rounded-full object-cover">
+        <p class="font-medium">
+          <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}">
+            {{ post.original_post.author.username }}
+          </a>
+        </p>
+      </div>
+
+      <p class="text-gray-800">{{ post.original_post.content }}</p>
+
+      {% if post.original_post.image %}
+        <img src="{{ post.original_post.image.url }}" class="rounded-lg">
+      {% endif %}
+    </div>
+
+  {% else %}
+    <!-- NORMAL POST -->
+    <div class="flex items-center gap-3">
+      <a href="{% url 'accounts:profile_detail' post.author.username %}">
+        <img src="{{ post.author.profile.avatar.url }}"
+             class="w-10 h-10 rounded-full object-cover">
+      </a>
+      <div>
+        <p class="font-medium">
+          <a href="{% url 'accounts:profile_detail' post.author.username %}">
+            {{ post.author.username }}
+          </a>
+        </p>
+        <p class="text-xs text-gray-500">
+          {{ post.created_at|timesince }} ago
+        </p>
       </div>
     </div>
 
@@ -39,29 +79,68 @@
     {% if post.image %}
       <img src="{{ post.image.url }}" class="rounded-lg">
     {% endif %}
+  {% endif %}
 
-        {% if post.author == request.user %}
-      <div class="flex gap-4 text-sm text-gray-500">
-        <a href="{% url 'posts:edit_post' post.id %}"
-          class="hover:text-indigo-600">
-          Edit
-        </a>
+  <!-- ACTIONS -->
+  {% with target_post=post.original_post|default:post %}
+  <div class="flex justify-end items-center gap-2 text-sm mt-2">
 
-        <form method="POST"
-              action="{% url 'posts:delete_post' post.id %}">
-          {% csrf_token %}
-          <button class="hover:text-red-600"
-                  onclick="return confirm('Delete this post?')">
-            Delete
-          </button>
-        </form>
-      </div>
+    <!-- SHARE -->
+    <a href="{% url 'posts:share_post' target_post.id %}"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+              text-white bg-blue-600 hover:text-indigo-600 hover:bg-indigo-50
+              transition font-medium">
+      <svg xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 12v.01M8 12h12m-8-4l4 4-4 4" />
+      </svg>
+      <span>Share</span>
+    </a>
+
+    {% if not post.original_post and post.author == request.user %}
+      <!-- EDIT -->
+      <a href="{% url 'posts:edit_post' post.id %}"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                bg-green-600 text-white hover:bg-green-800
+                transition font-medium">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5h2m-1-1v2m8 2l-9 9-4 1 1-4 9-9" />
+        </svg>
+        <span>Edit</span>
+      </a>
+
+      <!-- DELETE -->
+      <form method="POST"
+            action="{% url 'posts:delete_post' post.id %}">
+        {% csrf_token %}
+        <button type="submit"
+                onclick="return confirm('Delete this post?')"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                      text-white bg-red-600 hover:bg-red-800
+                      transition font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span>Delete</span>
+        </button>
+      </form>
     {% endif %}
 
   </div>
-  {% empty %}
-    <p class="text-center text-gray-500">No posts yet.</p>
-  {% endfor %}
+  {% endwith %}
+
+</div>
+{% empty %}
+<p class="text-center text-gray-500">No posts yet.</p>
+{% endfor %}
 
   <!-- Pagination -->
   <div class="flex justify-center gap-4">
