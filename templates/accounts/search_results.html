@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Search Users{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-6">
+
+  <h2 class="text-xl font-semibold mb-6">
+    Search results for "{{ query }}"
+  </h2>
+
+  {% for user in users %}
+    <div class="flex items-center justify-between
+                p-4 bg-white rounded-xl shadow mb-4
+                hover:bg-gray-50 transition">
+
+      <!-- LEFT: USER INFO -->
+      <a href="{% url 'accounts:profile_detail' user.username %}"
+         class="flex items-center gap-4">
+
+        <img src="{{ user.profile.avatar.url }}"
+             class="w-12 h-12 rounded-full object-cover">
+
+        <div class="max-w-md">
+          <p class="font-medium text-gray-900">
+            {{ user.username }}
+          </p>
+
+          {% if user.profile.full_name %}
+            <p class="text-sm text-gray-600">
+              {{ user.profile.full_name }}
+            </p>
+          {% endif %}
+
+          {% if user.profile.location %}
+            <p class="text-xs text-gray-500 mt-0.5">
+              <i class="fas fa-location-dot mr-1"></i>
+              {{ user.profile.location }}
+            </p>
+          {% endif %}
+
+          {% if user.profile.bio %}
+            <p class="text-sm text-gray-500 mt-1 line-clamp-2">
+              {{ user.profile.bio }}
+            </p>
+          {% endif %}
+        </div>
+      </a>
+
+        <!-- RIGHT: FOLLOW BUTTON -->
+        <div>
+        <button
+            class="follow-btn px-4 py-1.5 rounded-lg text-sm font-medium transition
+                {% if user.is_following %}
+                    bg-red-600 text-white
+                {% else %}
+                    bg-blue-600 text-white
+                {% endif %}"
+            data-username="{{ user.username }}"
+            data-following="{{ user.is_following|yesno:'true,false' }}">
+            
+            <span>{% if user.is_following %}<i class="fa-solid fa-user-minus mr-1"></i> Unfollow
+                {% else %}<i class="fa-solid fa-user-plus mr-1"></i>Follow{% endif %}</span>
+        </button>
+        </div>
+
+
+    </div>
+
+  {% empty %}
+    <p class="text-gray-500 text-center">
+      No users found.
+    </p>
+  {% endfor %}
+
+</div>
+{% endblock %}

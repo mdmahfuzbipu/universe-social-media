@@ -2,89 +2,195 @@
 {% load static %}
 {% load widget_tweaks %}
 
-{% block title %}My Profile{% endblock %}
+{% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8">
+<div class="max-w-6xl mx-auto px-4 py-10">
 
-  <!-- Header -->
-  <div class="flex items-center gap-6 mb-8">
-    <img src="{{ profile.avatar.url }}" class="w-24 h-24 rounded-full object-cover border">
-    <div>
-      <h1 class="text-2xl font-semibold">{{ profile_user.username }}</h1>
-      <p class="text-gray-500">Edit your profile information</p>
-    </div>
+  <!-- Page Header -->
+  <div class="mb-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-900">Edit Profile</h1>
+    <p class="text-gray-500 mt-2">Manage how people see you on UniVerse</p>
   </div>
 
-  <!-- Form -->
-  <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-6">
-    {% csrf_token %}
+  <div class="grid lg:grid-cols-3 gap-8">
 
-    <!-- Media -->
-    <div class="grid md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">Avatar</label>
-        {{ form.avatar|add_class:"block w-full text-sm" }}
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Cover Photo</label>
-        {{ form.cover_photo|add_class:"block w-full text-sm" }}
-      </div>
-    </div>
+    <!-- LEFT: Profile Preview -->
+    <div class="lg:col-span-1 order-2 lg:order-1">
+      <div class="bg-white rounded-2xl border shadow-sm p-6 text-center sticky top-24">
 
-    <!-- Identity -->
-    <div class="grid md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">Full Name</label>
-        {{ form.full_name|add_class:"w-full px-3 py-2 border rounded-lg" }}
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Date of Birth</label>
-        {{ form.date_of_birth|add_class:"w-full px-3 py-2 border rounded-lg" }}
-      </div>
-    </div>
+        <!-- Cover Photo + Avatar -->
+        <div class="relative">
+          <div class="w-full h-32 bg-gray-200 rounded-2xl overflow-hidden">
+            <img src="{% if profile.cover_photo %}{{ profile.cover_photo.url }}{% else %}{% static 'images/default-cover.png' %}{% endif %}" 
+                 class="w-full h-full object-cover">
+          </div>
+          <div class="absolute left-1/2 transform -translate-x-1/2 -bottom-12">
+            <img src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                 class="w-28 h-28 rounded-full border-4 border-white shadow">
+          </div>
+        </div>
 
-    <!-- Bio -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Bio</label>
-      {{ form.bio|add_class:"w-full px-3 py-2 border rounded-lg" }}
-    </div>
+        <h2 class="mt-16 text-xl font-semibold text-gray-900">{{ profile_user.username }}</h2>
 
-    <!-- Personal -->
-    <div class="grid md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">Location</label>
-        {{ form.location|add_class:"w-full px-3 py-2 border rounded-lg" }}
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Website</label>
-        {{ form.website|add_class:"w-full px-3 py-2 border rounded-lg" }}
+        {% if profile.full_name %}
+          <p class="text-gray-600">{{ profile.full_name }}</p>
+        {% endif %}
+
+        {% if profile.bio %}
+          <p class="text-sm text-gray-500 mt-3 line-clamp-3">{{ profile.bio }}</p>
+        {% endif %}
+
+        <div class="mt-6 text-sm text-gray-500">
+          This is how your profile looks to others
+        </div>
       </div>
     </div>
 
-    <!-- Professional -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Education</label>
-      {{ form.education|add_class:"w-full px-3 py-2 border rounded-lg" }}
-    </div>
+    <!-- RIGHT: Form -->
+    <div class="lg:col-span-2 order-1 lg:order-2">
+      <form method="POST" enctype="multipart/form-data" 
+            class="bg-white rounded-2xl border shadow-sm p-8 space-y-10">
+        {% csrf_token %}
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Experience</label>
-      {{ form.experience|add_class:"w-full px-3 py-2 border rounded-lg" }}
-    </div>
+    <!-- MEDIA -->
+    <section>
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Profile Media</h3>
+    <div class="grid md:grid-cols-2 gap-6">
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Skills</label>
-      {{ form.skills|add_class:"w-full px-3 py-2 border rounded-lg" }}
-    </div>
+        <!-- Avatar -->
+        <div class="bg-white rounded-xl shadow p-5 border flex flex-col items-center">
+        <label class="block text-sm font-medium mb-3">Avatar</label>
+        <div class="relative group w-28 h-28">
+            <img id="avatarPreview"
+                src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
+                class="w-full h-full rounded-full border object-cover shadow cursor-pointer">
 
-    <!-- Submit -->
-    <div class="flex justify-end">
-      <button class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
-        Save Changes
-      </button>
-    </div>
-  </form>
+            <!-- Overlay on hover -->
+            <div class="absolute inset-0 bg-black bg-opacity-25 rounded-full flex items-center justify-center text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition cursor-pointer">
+            Change
+            </div>
 
+            <!-- Hidden file input -->
+            <input type="file" name="avatar" id="id_avatar" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+        </div>
+        {% if form.avatar.errors %}
+                <p class="text-red-500 text-sm mt-2">{{ form.avatar.errors.0 }}</p>
+        {% endif %}
+        <p class="text-sm text-gray-500 mt-2 text-center">This image appears on your profile</p>
+        </div>
+
+        <!-- Cover Photo -->
+        <div class="bg-white rounded-xl shadow p-5 border flex flex-col items-center">
+        <label class="block text-sm font-medium mb-3">Cover Photo</label>
+        <div class="relative group w-full h-32 rounded-lg overflow-hidden">
+            <img id="coverPreview"
+                src="{% if profile.cover_photo %}{{ profile.cover_photo.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}"
+                class="w-full h-full object-cover shadow cursor-pointer">
+
+            <!-- Overlay on hover -->
+            <div class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition cursor-pointer">
+            Change
+            </div>
+
+            <!-- Hidden file input -->
+            <input type="file" name="cover_photo" id="id_cover_photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+
+        </div>
+        {% if form.cover_photo.errors %}
+                <p class="text-red-500 text-sm mt-2">{{ form.cover_photo.errors.0 }}</p>
+        {% endif %}
+        <p class="text-sm text-gray-500 mt-2 text-center">Shown at the top of your profile</p>
+        </div>
+
+    </div>
+    </section>
+
+
+        <!-- BASIC INFO -->
+        <section>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Basic Information</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium mb-1">Full Name</label>
+              {{ form.full_name|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Date of Birth</label>
+              {{ form.date_of_birth|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+          </div>
+        </section>
+
+        <!-- BIO -->
+        <section>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">About You</h3>
+          {{ form.bio|add_class:"w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none" }}
+        </section>
+
+        <!-- PERSONAL DETAILS -->
+        <section>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Personal Details</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium mb-1">Location</label>
+              {{ form.location|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Website</label>
+              {{ form.website|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+          </div>
+        </section>
+
+        <!-- PROFESSIONAL INFO -->
+        <section>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Professional Info</h3>
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium mb-1">Education</label>
+              <p class="text-xs text-gray-500 mb-1">Your educational background (e.g., University, degree)</p>
+              {{ form.education|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Experience</label>
+              <p class="text-xs text-gray-500 mb-1">Your work or project experience</p>
+              {{ form.experience|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Skills</label>
+              <p class="text-xs text-gray-500 mb-1">Technologies or skills (e.g., Django, Python, SQL)</p>
+              {{ form.skills|add_class:"w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" }}
+            </div>
+          </div>
+        </section>
+
+        <!-- SUBMIT -->
+        <div class="flex justify-end pt-6 border-t">
+          <button type="submit" class="bg-indigo-600 text-white px-10 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition shadow">
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- JS to preview selected files -->
+<script>
+document.getElementById('id_avatar').addEventListener('change', function(e) {
+    const [file] = e.target.files;
+    if (file) {
+        document.getElementById('avatarPreview').src = URL.createObjectURL(file);
+    }
+});
+
+document.getElementById('id_cover_photo').addEventListener('change', function(e) {
+    const [file] = e.target.files;
+    if (file) {
+        document.getElementById('coverPreview').src = URL.createObjectURL(file);
+    }
+});
+</script>
 {% endblock %}

@@ -19,10 +19,18 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
+from django.shortcuts import redirect
+
+def home_redirect(request):
+    return redirect("posts:feed")
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
+    path("interactions/", include("interactions.urls")),
+    path("", home_redirect, name="home"),
+    path("posts/", include("posts.urls")),
 ]
 
 

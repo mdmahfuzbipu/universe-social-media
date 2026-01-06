@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ list_type }} · {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-8">
+
+    <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-2xl font-bold mb-6">
+            {{ list_type }} of {{ profile_user.username }}
+        </h2>
+
+        {% if users %}
+            <ul class="space-y-4">
+                {% for user in users %}
+                <li class="flex items-center justify-between">
+
+                    <a href="{% url 'accounts:profile_detail' user.username %}"
+                       class="flex items-center gap-4">
+
+                        <img
+                            src="{% if user.profile.avatar %}
+                                    {{ user.profile.avatar.url }}
+                                 {% else %}
+                                    {% static 'images/default-avatar.png' %}
+                                 {% endif %}"
+                            class="w-12 h-12 rounded-full object-cover"
+                        >
+
+                        <div>
+                            <p class="font-medium text-gray-900">
+                                {{ user.profile.full_name|default:user.username }}
+                            </p>
+                            <p class="text-sm text-gray-500">@{{ user.username }}</p>
+                        </div>
+                    </a>
+
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-500">No users found.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
