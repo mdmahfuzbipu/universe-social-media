@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block title %}{{ profile_user.username }}'s Profile{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto mt-6">
@@ -8,7 +9,11 @@
     <!-- COVER -->
     <div class="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
         <img
-            src="{% if user.profile.cover_photo %}{{ user.profile.cover_photo.url }}{% else %}{% static 'images/default-cover.png' %}{% endif %}"
+            src="{% if profile_user.profile.cover_photo %}
+                    {{ profile_user.profile.cover_photo.url }}
+                 {% else %}
+                    {% static 'images/default-cover.png' %}
+                 {% endif %}"
             class="w-full h-full object-cover"
             alt="Cover photo"
         >
@@ -23,7 +28,11 @@
             <!-- Avatar -->
             <div class="flex flex-col md:flex-row items-center md:items-end">
                 <img
-                    src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
+                    src="{% if profile_user.profile.avatar %}
+                            {{ profile_user.profile.avatar.url }}
+                         {% else %}
+                            {% static 'images/default-avatar.png' %}
+                         {% endif %}"
                     class="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover"
                     alt="Avatar"
                 >
@@ -31,47 +40,90 @@
                 <!-- Name + Bio -->
                 <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
                     <h2 class="text-3xl font-bold text-gray-900">
-                        {{ user.profile.full_name|default:user.username }}
+                        {{ profile_user.profile.full_name|default:profile_user.username }}
                     </h2>
 
-                    {% if user.profile.bio %}
-                    <p class="text-gray-500 mt-1 max-w-xl">
-                        {{ user.profile.bio }}
-                    </p>
+                    {% if profile_user.profile.bio %}
+                        <p class="text-gray-500 mt-1 max-w-xl">
+                            {{ profile_user.profile.bio }}
+                        </p>
                     {% endif %}
                 </div>
             </div>
 
             <!-- ACTION BUTTONS -->
             <div class="mt-6 md:mt-0 flex gap-3">
-                <button
-                    class="px-5 py-2 rounded-xl bg-blue-600 text-white font-medium
-                           hover:bg-blue-700 transition transform hover:-translate-y-0.5 shadow">
-                    Follow
-                </button>
 
+                {# MESSAGE BUTTON (future feature) #}
+                {% if request.user.is_authenticated and request.user != profile_user %}
                 <button
-                    class="px-5 py-2 rounded-xl bg-gray-100 text-gray-800 font-medium
-                           hover:bg-gray-200 transition transform hover:-translate-y-0.5 shadow">
+                    class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white font-medium
+                        hover:bg-orange-900 transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
                     Message
                 </button>
+                {% endif %}
+
+                {# EDIT PROFILE BUTTON (only own profile) #}
+                {% if request.user == profile_user %}
+                <a href="{% url 'accounts:my_profile' %}"
+                class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium
+                        hover:bg-orange-700 transition shadow
+                        flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Edit Profile
+                </a>
+                {% endif %}
             </div>
         </div>
 
-        <!-- STATS -->
-        <div class="mt-6 flex justify-center md:justify-start gap-8 text-center">
-            <div>
-                <p class="text-xl font-semibold text-gray-900">0</p>
-                <p class="text-sm text-gray-500">Posts</p>
+        <!-- STATS + FOLLOW -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-6">
+
+            <!-- STATS -->
+            <div class="flex items-center gap-8 text-center justify-center md:justify-start">
+
+                <a href="{% url 'accounts:followers_list' profile_user.username %}">
+                <p id="followers-count-{{ profile_user.username }}" class="text-lg font-semibold text-gray-900 hover:underline">
+                    {{ followers_count }}
+                </p>
+
+                    <p class="text-sm text-gray-500">Followers</p>
+                </a>
+
+                <a href="{% url 'accounts:following_list' profile_user.username %}">
+                    <p class="text-lg font-semibold text-gray-900 hover:underline">
+                        {{ following_count }}
+                    </p>
+                    <p class="text-sm text-gray-500">Following</p>
+                </a>
+
             </div>
-            <div>
-                <p class="text-xl font-semibold text-gray-900">0</p>
-                <p class="text-sm text-gray-500">Followers</p>
-            </div>
-            <div>
-                <p class="text-xl font-semibold text-gray-900">0</p>
-                <p class="text-sm text-gray-500">Following</p>
-            </div>
+
+
+            <!-- FOLLOW / UNFOLLOW -->
+            {% if request.user.is_authenticated and request.user != profile_user %}
+            <button type="button"
+                    class="follow-btn mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow flex items-center gap-2
+                        {% if is_following %}
+                            bg-red-600 text-white hover:bg-red-700
+                        {% else %}
+                            bg-blue-600 text-white hover:bg-blue-700
+                        {% endif %}"
+                    data-username="{{ profile_user.username }}"
+                    data-following="{{ is_following|yesno:'true,false' }}">
+
+                <span class="flex items-center gap-1">
+                    {% if is_following %}
+                        <i class="fa-solid fa-user-minus"></i> Unfollow
+                    {% else %}
+                        <i class="fa-solid fa-user-plus"></i> Follow
+                    {% endif %}
+                </span>
+            </button>
+            {% endif %}
+
+
         </div>
     </div>
 
@@ -81,16 +133,30 @@
         <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
             <h3 class="font-semibold text-lg mb-4">Personal Info</h3>
             <ul class="space-y-2 text-gray-600">
-                {% if user.profile.location %}<li><strong>Location:</strong> {{ user.profile.location }}</li>{% endif %}
-                {% if user.profile.website %}<li><strong>Website:</strong> <a href="{{ user.profile.website }}" class="text-blue-600 hover:underline">{{ user.profile.website }}</a></li>{% endif %}
+                {% if profile_user.profile.location %}
+                    <li><strong>Location:</strong> {{ profile_user.profile.location }}</li>
+                {% endif %}
+                {% if profile_user.profile.website %}
+                    <li>
+                        <strong>Website:</strong>
+                        <a href="{{ profile_user.profile.website }}"
+                           class="text-blue-600 hover:underline" target="_blank">
+                            {{ profile_user.profile.website }}
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
 
         <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
             <h3 class="font-semibold text-lg mb-4">Professional Info</h3>
             <ul class="space-y-2 text-gray-600">
-                {% if user.profile.education %}<li><strong>Education:</strong> {{ user.profile.education }}</li>{% endif %}
-                {% if user.profile.skills %}<li><strong>Skills:</strong> {{ user.profile.skills }}</li>{% endif %}
+                {% if profile_user.profile.education %}
+                    <li><strong>Education:</strong> {{ profile_user.profile.education }}</li>
+                {% endif %}
+                {% if profile_user.profile.skills %}
+                    <li><strong>Skills:</strong> {{ profile_user.profile.skills }}</li>
+                {% endif %}
             </ul>
         </div>
 
@@ -99,7 +165,126 @@
     <!-- POSTS -->
     <div class="mt-10">
         <h3 class="text-lg font-semibold mb-4">Posts</h3>
+
+        {% for post in posts %}
+        <div class="bg-white rounded-xl shadow p-4 mb-4 space-y-3">
+
+            {% if post.original_post %}
+                <!-- SHARED POST HEADER -->
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <img src="{{ post.author.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover">
+                    <a href="{% url 'accounts:profile_detail' post.author.username %}"
+                    class="font-medium text-gray-700 hover:underline">
+                        {{ post.author.username }}
+                    </a>
+                    <span>shared this post</span>
+                </div>
+
+                <div class="border rounded-lg p-3 bg-gray-50 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <img src="{{ post.original_post.author.profile.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
+                        <p class="font-medium">
+                            <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}">
+                                {{ post.original_post.author.username }}
+                            </a>
+                        </p>
+                    </div>
+
+                    <p class="text-gray-800">{{ post.original_post.content }}</p>
+
+                    {% if post.original_post.image %}
+                        <img src="{{ post.original_post.image.url }}" class="rounded-lg">
+                    {% endif %}
+                </div>
+            {% else %}
+                <!-- NORMAL POST -->
+                <div class="flex items-center gap-3">
+                    <img src="{{ post.author.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <p class="font-medium">
+                            <a href="{% url 'accounts:profile_detail' post.author.username %}">
+                                {{ post.author.username }}
+                            </a>
+                        </p>
+                        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+                    </div>
+                </div>
+
+                <p class="text-gray-800">{{ post.content }}</p>
+
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="rounded-lg">
+                {% endif %}
+            {% endif %}
+
+            <!-- ACTION BUTTONS -->
+            {% with target_post=post.original_post|default:post %}
+            <div class="flex justify-end items-center gap-2 text-sm mt-2">
+
+                <!-- SHARE BUTTON -->
+                <a href="{% url 'posts:share_post' target_post.id %}"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                        text-white bg-blue-600 hover:bg-blue-800 transition font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 12v.01M8 12h12m-8-4l4 4-4 4" />
+                    </svg>
+                    <span>Share</span>
+                </a>
+
+                <!-- EDIT/DELETE (for post owner, including sharer) -->
+                {% if request.user == post.author %}
+                    <!-- EDIT -->
+                    <a href="{% url 'posts:edit_post' post.id %}"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600
+                            text-white hover:bg-green-800
+                            transition font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5h2m-1-1v2m8 2l-9 9-4 1 1-4 9-9" />
+                        </svg>
+                        <span>Edit</span>
+                    </a>
+
+                    <!-- DELETE -->
+                    <form method="POST" action="{% url 'posts:delete_post' post.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                onclick="return confirm('Delete this post?')"
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600
+                                    text-white hover:bg-red-800 transition font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Delete</span>
+                        </button>
+                    </form>
+                {% endif %}
+
+            </div>
+            {% endwith %}
+
+        </div>
+        {% empty %}
         <p class="text-gray-500">No posts yet.</p>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div class="flex justify-center gap-4 mt-6">
+            {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}"
+                class="text-indigo-600">
+                    Previous
+                </a>
+            {% endif %}
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}"
+                class="text-indigo-600">
+                    Next
+                </a>
+            {% endif %}
+        </div>
     </div>
 
 </div>

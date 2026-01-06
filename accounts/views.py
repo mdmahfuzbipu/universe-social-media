@@ -2,7 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
+from django.db.models import Q, Exists, OuterRef
 
+from posts.models import Post
+from interactions.models import Follow
 from .models import Profile
 from .forms import UserRegisterForm, ProfileUpdateForm  
 
@@ -21,20 +25,67 @@ def register(request):
     return render(request, "auth/register.html", {"form": form})
 
 
-@login_required
-def home(request):
-    return render(request, "accounts/home.html")
+# @login_required
+# def home(request):
+#     return render(request, "accounts/home.html")
 
 
 def profile_detail(request, username):
     user = get_object_or_404(User, username=username)
     profile, created = Profile.objects.get_or_create(user=user)
+
+    followers_count = Follow.objects.filter(following=user).count()
+    following_count = Follow.objects.filter(follower=user).count()
+
+    is_following = False
+    if request.user.is_authenticated:
+        is_following = Follow.objects.filter(
+            follower=request.user, following=user
+        ).exists()
+
+    # USER POSTS
+    posts_qs = Post.objects.filter(author=user).select_related("author")
+
+    paginator = Paginator(posts_qs, 5)  # 5 posts per page
+    page_number = request.GET.get("page")
+    posts = paginator.get_page(page_number)
+
     context = {
         "profile_user": user,
         "profile": profile,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
+        "posts": posts,  
     }
 
     return render(request, "accounts/profile_detail.html", context)
+
+
+def followers_list(request, username):
+    user = get_object_or_404(User, username=username)
+
+    followers = Follow.objects.filter(following=user).select_related("follower")
+
+    context = {
+        "profile_user": user,
+        "users": [f.follower for f in followers],
+        "list_type": "Followers",
+    }
+    return render(request, "accounts/follow_list.html", context)
+
+
+def following_list(request, username):
+    user = get_object_or_404(User, username=username)
+
+    following = Follow.objects.filter(follower=user).select_related("following")
+
+    context = {
+        "profile_user": user,
+        "users": [f.following for f in following],
+        "list_type": "Following",
+    }
+    return render(request, "accounts/follow_list.html", context)
 
 
 @login_required
@@ -56,3 +107,31 @@ def my_profile(request):
         "form": form,
     }
     return render(request, "accounts/my_profile.html", context)
+
+
+@login_required
+def search(request):
+    query = request.GET.get("q", "").strip()
+
+    users = []
+    if query:
+        users = (
+            User.objects.filter(
+                Q(username__icontains=query) | Q(profile__full_name__icontains=query)
+            )
+            .exclude(id=request.user.id)
+            .select_related("profile")
+            .annotate(
+                is_following=Exists(
+                    Follow.objects.filter(
+                        follower=request.user, following=OuterRef("pk")
+                    )
+                )
+            )
+        )
+
+    context = {
+        "query": query,
+        "users": users,
+    }
+    return render(request, "accounts/search_results.html", context)

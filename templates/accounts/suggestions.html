@@ -1,0 +1,39 @@
+<div class="bg-white rounded-xl shadow p-4">
+
+  <h3 class="font-semibold mb-4">
+    People you may know
+  </h3>
+
+  {% for user in suggested_users %}
+    <div class="flex items-center justify-between mb-3">
+
+      <a href="{% url 'accounts:profile_detail' user.username %}"
+         class="flex items-center gap-3">
+
+        <img src="{{ user.profile.avatar.url }}"
+             class="w-9 h-9 rounded-full object-cover">
+
+        <span class="text-sm font-medium">
+          {{ user.username }}
+        </span>
+      </a>
+
+    <button type="button"
+            class="follow-btn text-sm px-3 py-1 rounded-lg
+                bg-orange-500 text-white hover:bg-orange-700 flex items-center gap-1"
+            data-username="{{ user.username }}"
+            data-following="false">
+
+        <span class="flex items-center gap-1">
+            <i class="fa-solid fa-user-plus"></i> Follow
+        </span>
+    </button>
+
+    </div>
+  {% empty %}
+    <p class="text-sm text-gray-500">
+      No suggestions
+    </p>
+  {% endfor %}
+
+</div>

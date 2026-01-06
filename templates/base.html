@@ -6,8 +6,9 @@
     <title>{% block title %}UniVerse{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind + Plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=line-clamp"></script>
+
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -22,48 +23,78 @@
     </style>
 </head>
 
-<body class="bg-[#fdf8ff] text-gray-800">
+<body class="bg-[#fdf8ff] text-gray-800" style="background-image: url('{% static 'images/background.png' %}');">
 
 <!-- ================= NAVBAR ================= -->
 <header class="sticky top-0 z-50 bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] shadow-md">
     <div class="max-w-7xl mx-auto px-6">
         <div class="flex items-center justify-between h-16 md:h-18">
 
-            <!-- Bigger Logo -->
-            <a href="/" class="flex items-center">
-                <img src="{% static 'images/universe-logo.png' %}"
-                     alt="UniVerse"
-                      class="h-24 md:h-32 w-auto">
-            </a>
+            <!-- LEFT: Logo + Search -->
+            <div class="flex items-center gap-4">
 
-            <!-- Right Actions -->
+                <!-- Logo -->
+                <a href="{% url 'posts:feed' %}" class="flex items-center">
+                    <img src="{% static 'images/universe-logo.png' %}"
+                        alt="UniVerse"
+                        class="h-24 md:h-32 w-auto">
+                </a>
+
+
+                <!-- Search Users -->
+                <form method="GET"
+                    action="{% url 'accounts:search' %}"
+                    class="hidden md:flex items-center">
+
+                    <div class="relative">
+                        <input type="text"
+                            name="q"
+                            placeholder="Search people you may know.. "
+                            class="w-96 lg:w-[440px]
+                                    px-4 py-2 pl-10 text-sm
+                                    rounded-xl bg-orange-50
+                                    border border-orange-300
+                                    placeholder:text-gray-500
+                                    focus:outline-none
+                                    focus:ring-2 focus:ring-orange-400">
+
+                        <i class="fas fa-search absolute left-3 top-1/2
+                                -translate-y-1/2 text-orange-500 text-sm"></i>
+                    </div>
+                </form>
+
+
+            </div>
+
+            <!-- RIGHT: Profile -->
             <div class="flex items-center gap-6">
 
                 <!-- Profile Dropdown -->
                 <div class="relative group">
                     <button class="flex items-center gap-2 focus:outline-none">
                         <img
-                            src="{% if request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
-                            class="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
-                            alt="Profile"
-                        >
+                            src="{{ request.user.profile.avatar.url }}"
+                            class="w-9 h-9 rounded-full object-cover
+                                border-2 border-white shadow"
+                            alt="Profile">
                         <i class="fas fa-chevron-down text-sm text-white/80"></i>
                     </button>
 
                     <!-- Dropdown -->
                     <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
-                                opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                                transition-all duration-200">
+                                opacity-0 invisible group-hover:opacity-100
+                                group-hover:visible transition-all duration-200">
 
                         <a href="{% url 'accounts:profile_detail' request.user.username %}"
-                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                        class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
 
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit"
-                                    class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
+                                    class="w-full text-left px-4 py-3 text-sm
+                                        hover:bg-gray-100 rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
@@ -72,11 +103,28 @@
 
             </div>
         </div>
+
     </div>
 </header>
 
 <!-- ================= MAIN ================= -->
-<main class="max-w-7xl mx-auto px-6 py-10">
+<main class="max-w-7xl mx-auto px-2 py-4">
+
+    <!-- ================= MESSAGES ================= -->
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="px-4 py-2 rounded shadow
+                      {% if message.tags == 'error' %}bg-red-600 text-white{% endif %}
+                      {% if message.tags == 'success' %}bg-green-600 text-white{% endif %}
+                      {% if message.tags == 'warning' %}bg-yellow-600 text-white{% endif %}
+                      {% if message.tags == 'info' %}bg-blue-600 text-white{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% block content %}{% endblock %}
 </main>
 
@@ -111,5 +159,63 @@
     </div>
 </footer>
 
+<!-- JS for Follow/Unfollow -->
+<script>
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".follow-btn");
+    if (!btn) return;
+
+    const username = btn.dataset.username;
+    const textSpan = btn.querySelector("span");
+
+    btn.disabled = true;
+
+    fetch(`/interactions/follow/${username}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Remove old bg and hover
+        btn.classList.remove("bg-blue-600", "bg-red-600", "hover:bg-blue-700", "hover:bg-red-700");
+
+        if (data.status === "followed") {
+            textSpan.innerHTML = '<i class="fa-solid fa-user-minus"></i> Unfollow';
+            btn.classList.add("bg-red-600", "text-white", "hover:bg-red-700");
+            btn.dataset.following = "true";
+        } else if (data.status === "unfollowed") {
+            textSpan.innerHTML = '<i class="fa-solid fa-user-plus"></i> Follow';
+            btn.classList.add("bg-blue-600", "text-white", "hover:bg-blue-700");
+            btn.dataset.following = "false";
+        }
+
+        // Update follower count if exists
+        const countEl = document.querySelector(`#followers-count-${username}`);
+        if (countEl) countEl.textContent = data.followers_count;
+    })
+    .catch(console.error)
+    .finally(() => {
+        btn.disabled = false;
+    });
+});
+
+/* CSRF helper */
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 </body>
 </html>
