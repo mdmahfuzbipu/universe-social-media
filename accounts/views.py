@@ -9,6 +9,10 @@ from posts.models import Post
 from interactions.models import Follow
 from .models import Profile
 from .forms import UserRegisterForm, ProfileUpdateForm  
+from posts.views import reaction_icons, reaction_colors
+from interactions.models import Reaction
+from .helpers import get_reaction_map, get_user_reactions
+
 
 User = get_user_model()
 
@@ -49,6 +53,10 @@ def profile_detail(request, username):
     paginator = Paginator(posts_qs, 5)  # 5 posts per page
     page_number = request.GET.get("page")
     posts = paginator.get_page(page_number)
+    
+    # Reaction info
+    reaction_map = get_reaction_map(posts)  # Pass the paginated posts or posts_qs
+    user_reactions = get_user_reactions(request.user, posts)
 
     context = {
         "profile_user": user,
@@ -56,7 +64,12 @@ def profile_detail(request, username):
         "followers_count": followers_count,
         "following_count": following_count,
         "is_following": is_following,
-        "posts": posts,  
+        "posts": posts,
+        "reaction_map": reaction_map,
+        "user_reactions": user_reactions,
+        "reaction_icons": reaction_icons,
+        "reaction_choices": Reaction.REACTION_CHOICES,
+        "reaction_colors": reaction_colors,
     }
 
     return render(request, "accounts/profile_detail.html", context)

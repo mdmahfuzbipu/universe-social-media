@@ -34,6 +34,12 @@
             .animate-slide-in {
             animation: slideIn 0.3s ease-out forwards;
             }
+        .reaction-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            }
+
 
     </style>
 </head>
@@ -266,5 +272,9 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
+
+<!--Script for reactions-->
+<script src="{% static 'js/reactions.js' %}"></script>
+
 </body>
 </html>
