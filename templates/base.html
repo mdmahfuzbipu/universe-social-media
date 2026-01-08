@@ -20,6 +20,21 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            }
+
+            .animate-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+            }
+
     </style>
 </head>
 
@@ -112,18 +127,52 @@
 
     <!-- ================= MESSAGES ================= -->
     {% if messages %}
-      <div class="mb-6 space-y-2">
+    <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-3 w-full max-w-sm px-4">
         {% for message in messages %}
-          <div class="px-4 py-2 rounded shadow
-                      {% if message.tags == 'error' %}bg-red-600 text-white{% endif %}
-                      {% if message.tags == 'success' %}bg-green-600 text-white{% endif %}
-                      {% if message.tags == 'warning' %}bg-yellow-600 text-white{% endif %}
-                      {% if message.tags == 'info' %}bg-blue-600 text-white{% endif %}">
+        <div
+            class="flex items-start gap-3 p-4 rounded-xl shadow-lg border
+            {% if message.tags == 'success' %}
+            bg-green-600 border-green-200 text-white
+            {% elif message.tags == 'error' %}
+            bg-red-600 border-red-200 text-white
+            {% elif message.tags == 'warning' %}
+            bg-yellow-500 border-yellow-200 text-white
+            {% else %}
+            bg-blue-600 border-blue-200 text-white
+            {% endif %}
+            animate-slide-in"
+        >
+
+            <!-- ICON -->
+            <div class="mt-0.5 text-lg">
+            {% if message.tags == 'success' %}
+                <i class="fa-solid fa-circle-check"></i>
+            {% elif message.tags == 'error' %}
+                <i class="fa-solid fa-circle-xmark"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+                <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div class="flex-1 text-sm font-medium leading-relaxed">
             {{ message }}
-          </div>
+            </div>
+
+            <!-- CLOSE -->
+            <button onclick="this.parentElement.remove()"
+                    class="text-lg leading-none opacity-50 hover:opacity-100">
+            ×
+            </button>
+
+        </div>
         {% endfor %}
-      </div>
+    </div>
     {% endif %}
+
 
     {% block content %}{% endblock %}
 </main>
