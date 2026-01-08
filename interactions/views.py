@@ -4,6 +4,11 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.db import IntegrityError
+from django.db import models
+
+from posts.models import Post
+from .models import Reaction
 
 
 from .models import Follow
@@ -30,3 +35,51 @@ def follow_toggle(request, username):
     followers_count = Follow.objects.filter(following=target_user).count()
 
     return JsonResponse({"status": status, "followers_count": followers_count})
+
+
+@login_required
+def reaction_toggle(request, post_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    reaction_type = request.POST.get("reaction")
+    if reaction_type not in dict(Reaction.REACTION_CHOICES):
+        return JsonResponse({"error": "Invalid reaction"}, status=400)
+
+    post = get_object_or_404(Post, id=post_id)
+
+    existing = Reaction.objects.filter(user=request.user, post=post).first()
+
+    if existing:
+        if existing.reaction == reaction_type:
+            # same reaction → remove
+            existing.delete()
+            user_reaction = None
+        else:
+            # change reaction
+            existing.reaction = reaction_type
+            existing.save(update_fields=["reaction"])
+            user_reaction = reaction_type
+    else:
+        try:
+            Reaction.objects.create(
+                user=request.user, post=post, reaction=reaction_type
+            )
+            user_reaction = reaction_type
+        except IntegrityError:
+            user_reaction = None
+
+    # aggregated counts
+    counts = (
+        Reaction.objects.filter(post=post)
+        .values("reaction")
+        .annotate(count=models.Count("id"))
+    )
+
+    return JsonResponse(
+        {
+            "post_id": post.id,
+            "user_reaction": user_reaction,
+            "counts": {c["reaction"]: c["count"] for c in counts},
+        }
+    )

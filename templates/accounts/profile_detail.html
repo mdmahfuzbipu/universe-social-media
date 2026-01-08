@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load post_extras %}
 
 {% block title %}{{ profile_user.username }}'s Profile{% endblock %}
 
@@ -216,6 +217,35 @@
                     <img src="{{ post.image.url }}" class="rounded-lg">
                 {% endif %}
             {% endif %}
+
+            <!-- Reactions -->
+            {% with post_reactions=reaction_map|get_item:post.id %}
+            <div class="reaction-bar flex items-center gap-3 text-sm mt-3" data-post-id="{{ post.id }}">
+                {% for key, label in reaction_choices %}
+                <button
+                    class="reaction-btn px-2 py-1 rounded flex items-center gap-1
+                        {% if user_reactions|get_item:post.id == key %}
+                            bg-gray-200 font-semibold
+                        {% endif %}"
+                    data-reaction="{{ key }}">
+                    
+                    <!-- Icon -->
+                    <span class="mr-1 {{ reaction_colors|get_item:key }}">
+                        <i class="fa-solid {{ reaction_icons|get_item:key }}"></i>
+                    </span>
+
+                    <!-- Label text -->
+                    <span class="text-gray-700">{{ label }}</span>
+
+                    <!-- Count -->
+                    <span class="reaction-count text-gray-500 ml-1">
+                        {{ post_reactions|get_item:key|default:"0" }}
+                    </span>
+                </button>
+                {% endfor %}
+            </div>
+            {% endwith %}
+
 
             <!-- ACTION BUTTONS -->
             {% with target_post=post.original_post|default:post %}
