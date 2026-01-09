@@ -42,7 +42,12 @@ def feed(request):
     posts = (
         Post.objects.filter(author__in=list(following_users) + [request.user.id])
         .select_related("author", "original_post", "original_post__author")
-        .prefetch_related("reactions")
+        .prefetch_related(
+            "reactions",
+            "comments",
+            "comments__user",
+            "comments__user__profile",
+        )
     )
 
     # current user's reactions
