@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from django.db import models
 
 from posts.models import Post
-from .models import Reaction
+from .models import Reaction, Comment
 
 
 from .models import Follow
@@ -83,3 +83,56 @@ def reaction_toggle(request, post_id):
             "counts": {c["reaction"]: c["count"] for c in counts},
         }
     )
+
+
+@login_required
+@require_POST
+def add_comment(request, post_id):
+    content = request.POST.get("content", "").strip()
+
+    if not content:
+        return JsonResponse({"error": "Comment cannot be empty"}, status=400)
+
+    post = get_object_or_404(Post, id=post_id)
+
+    comment = Comment.objects.create(user=request.user, post=post, content=content)
+
+    return JsonResponse(
+        {
+            "id": comment.id,
+            "user": request.user.username,
+            "avatar": request.user.profile.avatar.url,
+            "content": comment.content,
+            "created_at": comment.created_at.strftime("%b %d, %Y %H:%M"),
+        }
+    )
+
+
+@login_required
+@require_POST
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if comment.user != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
+    content = request.POST.get("content", "").strip()
+    if not content:
+        return JsonResponse({"error": "Empty comment"}, status=400)
+
+    comment.content = content
+    comment.save(update_fields=["content"])
+
+    return JsonResponse({"content": comment.content})
+
+
+@login_required
+@require_POST
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if comment.user != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
+    comment.delete()
+    return JsonResponse({"success": True})
