@@ -70,11 +70,11 @@
 
 <!-- ================= NAVBAR ================= -->
 <header class="sticky top-0 z-50 bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] shadow-md">
-    <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-9xl mx-auto px-9">
         <div class="flex items-center justify-between h-16 md:h-18">
 
             <!-- LEFT: Logo + Search -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-6">
 
                 <!-- Logo -->
                 <a href="{% url 'posts:feed' %}" class="flex items-center">
@@ -82,7 +82,6 @@
                         alt="UniVerse"
                         class="h-24 md:h-32 w-auto">
                 </a>
-
 
                 <!-- Search Users -->
                 <form method="GET"
@@ -92,52 +91,86 @@
                     <div class="relative">
                         <input type="text"
                             name="q"
-                            placeholder="Search people you may know.. "
+                            placeholder="Search people you may know..."
                             class="w-96 lg:w-[440px]
-                                    px-4 py-2 pl-10 text-sm
-                                    rounded-xl bg-orange-50
-                                    border border-orange-300
-                                    placeholder:text-gray-500
-                                    focus:outline-none
-                                    focus:ring-2 focus:ring-orange-400">
+                                   px-4 py-2 pl-10 text-sm
+                                   rounded-xl bg-orange-50
+                                   border border-orange-300
+                                   placeholder:text-gray-500
+                                   focus:outline-none
+                                   focus:ring-2 focus:ring-orange-400">
 
                         <i class="fas fa-search absolute left-3 top-1/2
-                                -translate-y-1/2 text-orange-500 text-sm"></i>
+                               -translate-y-1/2 text-orange-500 text-sm"></i>
                     </div>
                 </form>
-
-
             </div>
 
-            <!-- RIGHT: Profile -->
-            <div class="flex items-center gap-4">
+            <!-- RIGHT: Navigation + Profile -->
+            <div class="flex items-center gap-6">
+
+                <!-- NAV ICONS -->
+                <div class="hidden md:flex items-center gap-4">
+                    <!-- Home -->
+                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition">
+                        <i class="fas fa-home text-xl"></i>
+                        <span class="text-xs mt-1">Home</span>
+                    </a>
+
+                    <!-- Friends -->
+                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition">
+                        <i class="fas fa-user-friends text-xl"></i>
+                        <span class="text-xs mt-1">Friends</span>
+                    </a>
+
+                    <!-- Messages -->
+                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition relative">
+                        <i class="fas fa-comment-alt text-xl"></i>
+                        <span class="text-xs mt-1">Messages</span>
+                        <!-- Optional: Unread badge -->
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">3</span>
+                    </a>
+
+                    <!-- Notifications -->
+                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="text-xs mt-1">Notifications</span>
+                        <!-- Optional: Unread badge -->
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">5</span>
+                    </a>
+                </div>
 
                 <!-- Profile Dropdown -->
-                <div class="relative group">
-                    <button class="flex items-center gap-2 focus:outline-none">
+                <div class="relative">
+                    <button
+                        id="profileMenuBtn"
+                        class="flex items-center gap-2 focus:outline-none"
+                        onclick="toggleProfileMenu()"
+                    >
                         <img
                             src="{{ request.user.profile.avatar.url }}"
-                            class="w-9 h-9 rounded-full object-cover
-                                border-2 border-white shadow"
-                            alt="Profile">
+                            class="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+                            alt="Profile"
+                        >
                         <i class="fas fa-chevron-down text-sm text-white/80"></i>
                     </button>
 
                     <!-- Dropdown -->
-                    <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
-                                opacity-0 invisible group-hover:opacity-100
-                                group-hover:visible transition-all duration-200">
-
+                    <div
+                        id="profileMenu"
+                        class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
+                            opacity-0 invisible scale-95
+                            transition-all duration-150 origin-top-right z-50"
+                    >
                         <a href="{% url 'accounts:profile_detail' request.user.username %}"
-                        class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
 
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit"
-                                    class="w-full text-left px-4 py-3 text-sm
-                                        hover:bg-gray-100 rounded-b-xl">
+                                    class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
@@ -146,12 +179,11 @@
 
             </div>
         </div>
-
     </div>
 </header>
 
 <!-- ================= MAIN ================= -->
-<main class="max-w-7xl mx-auto px-2 py-4">
+<main class="max-w-9xl mx-auto px-9 py-2">
 
     <!-- ================= MESSAGES ================= -->
     {% if messages %}
@@ -293,6 +325,26 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+</script>
+
+<!-- Scripts for profile toggle -->
+<script>
+function toggleProfileMenu() {
+    const menu = document.getElementById("profileMenu");
+    menu.classList.toggle("opacity-0");
+    menu.classList.toggle("invisible");
+    menu.classList.toggle("scale-95");
+}
+
+// Close when clicking outside
+document.addEventListener("click", function (e) {
+    const btn = document.getElementById("profileMenuBtn");
+    const menu = document.getElementById("profileMenu");
+
+    if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("opacity-0", "invisible", "scale-95");
+    }
+});
 </script>
 
 <!--Script for reactions-->
