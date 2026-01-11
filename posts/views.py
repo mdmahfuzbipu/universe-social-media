@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from interactions.models import Follow, Reaction
 from .models import Post
 from .forms import PostForm
+from notifications.models import Notification
+from notifications.utils import create_notification
 
 User = get_user_model()
 
@@ -158,5 +160,12 @@ def share_post(request, post_id):
         return redirect("posts:feed")
 
     Post.objects.create(author=request.user, original_post=original)
-
+    # notify original post author
+    create_notification(
+        recipient=original.author,
+        sender=request.user,
+        notif_type=Notification.NOTIF_SHARE,
+        post=original
+    )
+    
     return redirect("posts:feed")

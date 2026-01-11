@@ -9,7 +9,8 @@ from django.db import models
 
 from posts.models import Post
 from .models import Reaction, Comment
-
+from notifications.utils import create_notification
+from notifications.models import Notification
 
 from .models import Follow
 
@@ -31,7 +32,9 @@ def follow_toggle(request, username):
     else:
         Follow.objects.create(follower=request.user, following=target_user)
         status = "followed"
-
+        create_notification(
+            recipient=target_user, sender=request.user, notif_type=Notification.NOTIF_FOLLOW
+        )
     followers_count = Follow.objects.filter(following=target_user).count()
 
     return JsonResponse({"status": status, "followers_count": followers_count})
@@ -60,12 +63,24 @@ def reaction_toggle(request, post_id):
             existing.reaction = reaction_type
             existing.save(update_fields=["reaction"])
             user_reaction = reaction_type
+            create_notification(
+                recipient=post.author,
+                sender=request.user,
+                notif_type=Notification.NOTIF_REACTION,
+                post=post
+            )
     else:
         try:
             Reaction.objects.create(
                 user=request.user, post=post, reaction=reaction_type
             )
             user_reaction = reaction_type
+            create_notification(
+                recipient=post.author,
+                sender=request.user,
+                notif_type=Notification.NOTIF_REACTION,
+                post=post
+            )
         except IntegrityError:
             user_reaction = None
 
@@ -97,6 +112,29 @@ def add_comment(request, post_id):
 
     comment = Comment.objects.create(user=request.user, post=post, content=content)
 
+    # notify post author
+    create_notification(
+        recipient=post.author,
+        sender=request.user,
+        notif_type=Notification.NOTIF_COMMENT,
+        post=post,
+        comment=comment,
+    )
+
+    # notify other commenters except the author and current user
+    other_commenters = (
+        post.comments.exclude(user__in=[post.author, request.user])
+        .values_list("user", flat=True)
+        .distinct()
+    )
+    for u_id in other_commenters:
+        create_notification(
+            recipient=u_id,
+            sender=request.user,
+            notif_type=Notification.NOTIF_COMMENT,
+            post=post,
+            comment=comment,
+        )
     return JsonResponse(
         {
             "id": comment.id,
