@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-6 px-4 md:px-6">
+    
+    <div class="flex items-center gap-3 mb-6 border-b border-gray-300 pb-3">
+        <div class="w-9 h-9 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-800">
+            Notifications
+        </h2>
+    </div>
+
+    <ul class="space-y-3">
+        {% for notif in notifications %}
+        <li class="p-4 rounded-xl border flex gap-5 items-start
+            {% if not notif.read %}bg-yellow-50{% else %}bg-white{% endif %}
+            hover:shadow-sm transition">
+
+
+            <!-- AVATAR -->
+            <img
+                src="{{ notif.sender.profile.avatar.url }}"
+                class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                alt="{{ notif.sender.username }}"
+            >
+
+            <!-- CONTENT -->
+            <div class="flex-1 min-w-0">
+                <a href="{% url 'notifications:mark_as_read' notif.id %}?next={{ notif.get_target_url }}"
+                class="block text-sm text-gray-800 hover:underline">
+
+                    <strong>{{ notif.sender.username }}</strong>
+                    {{ notif.get_message }}
+
+                    {% if notif.notif_type == 'comment' %}
+                        <span class="italic text-gray-600">
+                            “{{ notif.comment.content|truncatechars:50 }}”
+                        </span>
+                    {% endif %}
+                </a>
+
+                <div class="text-xs text-gray-400 mt-1">
+                    {{ notif.created_at|timesince }} ago
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="flex flex-col items-end gap-2 text-xs self-center">
+                {% if not notif.read %}
+                    <a href="{% url 'notifications:mark_as_read' notif.id %}?next={{ notif.get_target_url }}"
+                    class="text-blue-600 hover:text-blue-800">
+                        Mark read
+                    </a>
+                {% endif %}
+
+                <a href="{% url 'notifications:delete' notif.id %}"
+                onclick="return confirm('Delete this notification?');"
+                class="text-red-500 hover:text-red-700 flex items-center gap-1">
+                    <i class="fa-solid fa-trash text-[11px]"></i>
+                    Delete
+                </a>
+            </div>
+        </li>
+        {% empty %}
+            <li>No notifications yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
