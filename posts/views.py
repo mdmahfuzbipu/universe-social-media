@@ -77,7 +77,6 @@ def feed(request):
             reaction_map[post_id] = {}
         reaction_map[post_id][reaction] = count
 
-    # Make sure every post_id has a dict, even if empty
     for post in posts:
         if post.id not in reaction_map:
             reaction_map[post.id] = {}

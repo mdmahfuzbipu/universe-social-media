@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load dict_extras %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto mt-6 px-4 md:px-6">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6 border-b border-gray-300 pb-3">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
+                <i class="fa-solid fa-envelope"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-semibold text-gray-800">
+                Messages
+            </h2>
+        </div>
+    </div>
+
+    <!-- SEARCH (UI only for now) -->
+    <div class="mb-4">
+        <input
+            type="text"
+            placeholder="Search conversations..."
+            class="w-full px-4 py-2 rounded-lg border focus:ring focus:ring-orange-200 outline-none"
+        >
+    </div>
+
+    <!-- CONVERSATION LIST -->
+    <div class="bg-white rounded-xl shadow divide-y">
+
+        {% for convo in conversations %}
+        {% with other=other_users|get:convo.id %}
+        <div class="flex items-center px-4 py-3 gap-4
+            {% if convo.unread_count > 0 %}bg-yellow-50{% endif %}
+            hover:bg-gray-50 transition">
+
+            <!-- CLICKABLE MAIN AREA -->
+            <a href="{% url 'messaging:detail' convo.id %}"
+               class="flex items-center gap-4 flex-1 min-w-0">
+
+                <!-- AVATAR -->
+                <img
+                    src="{{ other.profile.avatar.url }}"
+                    class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                    alt="{{ other.username }}"
+                >
+
+                <!-- CONTENT -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center">
+                        <p class="font-medium text-gray-900 truncate">
+                            {{ other.profile.full_name }}
+                        </p>
+
+                        {% if convo.last_message_time %}
+                        <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                            {{ convo.last_message_time|timesince }} ago
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-sm text-gray-500 truncate mt-1">
+                        {{ convo.last_message_text|default:"Start a conversation" }}
+                    </p>
+
+                    <div class="mt-2 border-t border-gray-200"></div>
+                </div>
+            </a>
+
+            <!-- UNREAD BADGE -->
+            {% if convo.unread_count > 0 %}
+            <span class="ml-2 min-w-[20px] h-[20px]
+                flex items-center justify-center
+                text-xs font-bold text-white bg-red-600 rounded-full px-1">
+                {{ convo.unread_count }}
+            </span>
+            {% endif %}
+
+            <!-- DOT MENU -->
+            <div class="relative ml-2 group">
+
+                <!-- DOT BUTTON -->
+                <button
+                    type="button"
+                    class="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                >
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+
+                <!-- HOVER BUFFER (VERY IMPORTANT) -->
+                <div class="absolute top-full left-0 w-full h-2"></div>
+
+                <!-- MENU -->
+                <div
+                    class="absolute right-0 top-full mt-2 w-40 bg-white rounded-lg shadow-lg
+                        opacity-0 invisible
+                        group-hover:opacity-100 group-hover:visible
+                        transition z-30"
+                >
+
+                    {% if convo.unread_count > 0 %}
+                    <a href="{% url 'messaging:mark_conversation_read' convo.id %}"
+                    class="block px-4 py-2 text-sm hover:bg-gray-100">
+                        Mark as read
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'messaging:delete_conversation' convo.id %}"
+                    onclick="return confirm('Delete this conversation?');"
+                    class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        Delete
+                    </a>
+                </div>
+            </div>
+
+
+
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="p-6 text-center text-gray-500">
+            No conversations yet.
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}
