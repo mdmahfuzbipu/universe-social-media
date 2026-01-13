@@ -48,15 +48,21 @@ def profile_detail(request, username):
         ).exists()
 
     # USER POSTS
-    posts_qs = Post.objects.filter(author=user).select_related("author")
+    posts_qs = Post.objects.filter(author=user).select_related(
+        "author", "original_post", "original_post__author"
+    ).prefetch_related(
+        "reactions",
+        "comments",
+        "comments__user",
+        "comments__user__profile",
+    ).order_by("-created_at")
 
-    paginator = Paginator(posts_qs, 5)  # 5 posts per page
+    paginator = Paginator(posts_qs, 5)
     page_number = request.GET.get("page")
-    posts = paginator.get_page(page_number)
-    
-    # Reaction info
-    reaction_map = get_reaction_map(posts)  # Pass the paginated posts or posts_qs
-    user_reactions = get_user_reactions(request.user, posts)
+    page_obj = paginator.get_page(page_number)
+
+    reaction_map = get_reaction_map(page_obj.object_list)
+    user_reactions = get_user_reactions(request.user, page_obj.object_list)
 
     context = {
         "profile_user": user,
@@ -64,13 +70,14 @@ def profile_detail(request, username):
         "followers_count": followers_count,
         "following_count": following_count,
         "is_following": is_following,
-        "posts": posts,
+        "page_obj": page_obj,
         "reaction_map": reaction_map,
         "user_reactions": user_reactions,
         "reaction_icons": reaction_icons,
         "reaction_choices": Reaction.REACTION_CHOICES,
         "reaction_colors": reaction_colors,
     }
+
 
     return render(request, "accounts/profile_detail.html", context)
 
