@@ -182,7 +182,7 @@
       <div class="flex items-center gap-2 text-sm text-gray-500">
         <a href="{% url 'accounts:profile_detail' post.author.username %}"><img src="{{ post.author.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover"></a>
         <a href="{% url 'accounts:profile_detail' post.author.username %}" class="font-medium text-gray-700 hover:underline">
-          {{ post.author.username }}
+          {{ post.author.profile.full_name }}
         </a>
         <span>shared this post</span>
       </div>
@@ -238,7 +238,7 @@
         <img src="{{ post.original_post.author.profile.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
         <p class="font-medium">
           <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}">
-            {{ post.original_post.author.username }}
+            {{ post.original_post.author.profile.full_name }}
           </a>
         </p>
       </div>
@@ -261,7 +261,7 @@
           <div>
             <p class="font-medium">
               <a href="{% url 'accounts:profile_detail' post.author.username %}">
-                {{ post.author.username }}
+                {{ post.author.profile.full_name }}
               </a>
             </p>
             <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
@@ -368,7 +368,7 @@
               <div>
                 <a href="{% url 'accounts:profile_detail' comment.user.username %}"
                   class="font-semibold text-sm text-gray-900 hover:underline">
-                  {{ comment.user.username }}
+                  {{ comment.user.profile.full_name }}
                 </a>
                 <span class="text-xs text-gray-400 ml-2">
                   {{ comment.created_at|timesince }} ago

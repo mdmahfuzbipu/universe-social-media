@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "posts",
     "interactions",
     "notifications",
+    "messaging",
+    # third-party apps
     "widget_tweaks",
 ]
 
@@ -82,6 +84,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "notifications.context_processors.unread_notifications",
+                "messaging.context_processors.messaging_context",
             ],
         },
     },

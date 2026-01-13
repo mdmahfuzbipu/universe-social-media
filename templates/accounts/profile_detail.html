@@ -57,12 +57,15 @@
 
                 {# MESSAGE BUTTON (future feature) #}
                 {% if request.user.is_authenticated and request.user != profile_user %}
-                <button
-                    class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white font-medium
-                        hover:bg-orange-900 transition shadow flex items-center gap-2">
+                <a href="{% url 'messaging:start' profile_user.username %}"
+                class="px-5 py-2 rounded-xl bg-gradient-to-r
+                        from-[#FBBF24] via-[#F59E0B] to-[#D97706]
+                        text-white font-medium hover:bg-orange-900
+                        transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane"></i>
                     Message
-                </button>
+                </a>
+
                 {% endif %}
 
                 {# EDIT PROFILE BUTTON (only own profile) #}
