@@ -148,3 +148,40 @@ def search(request):
         "users": users,
     }
     return render(request, "accounts/search_results.html", context)
+
+
+@login_required
+def people(request):
+    query = request.GET.get("q", "").strip()
+
+    qs = (
+        User.objects.exclude(id=request.user.id)
+        .annotate(
+            is_following=Exists(
+                Follow.objects.filter(follower=request.user, following=OuterRef("pk"))
+            )
+        )
+        .filter(is_following=False)
+        .select_related("profile")
+        .order_by("-date_joined")
+    )
+
+    if query:
+        qs = qs.filter(
+            Q(username__icontains=query)
+            | Q(profile__full_name__icontains=query)
+            | Q(profile__skills__icontains=query)
+        )
+
+    paginator = Paginator(qs, 12)  # 12 users per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "accounts/people.html",
+        {
+            "page_obj": page_obj,
+            "query": query,
+        },
+    )
