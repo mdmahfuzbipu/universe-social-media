@@ -123,11 +123,14 @@
                         <span class="text-xs mt-1">Home</span>
                     </a>
 
-                    <!-- Friends -->
-                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition">
-                        <i class="fas fa-user-friends text-xl"></i>
-                        <span class="text-xs mt-1">Friends</span>
-                    </a>
+            <!-- People -->
+            <a href="{% url 'accounts:people' %}"
+            class="flex flex-col items-center text-white hover:text-white/80 transition">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-xs mt-1">People</span>
+            </a>
+
+
 
             <!-- Messages -->
             <div class="relative" id="msg-wrapper">
@@ -189,12 +192,13 @@
                     {% endfor %}
                 </ul>
 
-                <div class="text-center py-2 border-t">
-                    <a href="{% url 'messaging:inbox' %}"
-                    class="text-sm text-blue-600 hover:underline">
-                        View all
-                    </a>
-                </div>
+            <div class="px-4 py-2 border-t">
+                <a href="{% url 'messaging:inbox' %}"
+                class="block w-full text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition">
+                    View all
+                </a>
+            </div>
+
             </div>
             </div>
 
@@ -261,11 +265,13 @@
                             {% endfor %}
                         </ul>
 
-                        <div class="text-center py-2 border-t">
-                            <a href="{% url 'notifications:list' %}" class="text-sm text-blue-600 hover:underline">
-                                View all
-                            </a>
-                        </div>
+                    <div class="px-4 py-2 border-t">
+                        <a href="{% url 'notifications:list' %}"
+                        class="block w-full text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition">
+                            View all
+                        </a>
+                    </div>
+
                     </div>
                 </div>
 
@@ -295,14 +301,14 @@
                             transition-all duration-150 origin-top-right z-50"
                     >
                         <a href="{% url 'accounts:profile_detail' request.user.username %}"
-                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl font-semibold">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
 
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit"
-                                    class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 rounded-b-xl">
+                                    class="w-full text-left px-4 py-3 text-sm text-red-600 font-semibold rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
