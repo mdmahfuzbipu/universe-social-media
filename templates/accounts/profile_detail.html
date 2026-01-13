@@ -1,139 +1,109 @@
 {% extends "base.html" %}
 {% load static %}
 {% load custom_filters %}
+{% load widget_tweaks %}
+{% load post_extras %}
 
 {% block title %}{{ profile_user.username }}'s Profile{% endblock %}
 
 {% block content %}
+<style>
+
+/* Reaction pop animation */
+@keyframes reaction-pop {0% {transform: scale(1);} 40% {transform: scale(1.35);} 70% {transform: scale(0.95);} 100% {transform: scale(1);}}
+.reaction-animate {animation: reaction-pop 0.35s ease;}
+.reaction-active {background-color: #e5e7eb; font-weight: 600;}
+
+@keyframes float-up {0% {opacity: 0; transform: translateY(10px) scale(0.8);} 20% {opacity:1; transform: translateY(0) scale(1.3);} 100% {opacity:0; transform: translateY(-40px) scale(1);}}
+.floating-emoji {position: absolute; font-size:1.5rem; animation: float-up 0.9s ease forwards;}
+
+.reaction-picker {transform-origin: bottom left;}
+.picker-reaction {cursor:pointer; transition: transform 0.2s ease;}
+.picker-reaction:hover {transform: scale(1.3);}
+
+/* Comment bubble pointer */
+.comment-bubble::before {content:""; position:absolute; top:10px; left:-12px; width:0;height:0; border-top:10px solid transparent; border-bottom:10px solid transparent; border-right:12px solid #FEF3C7;}
+.comment-bubble {position:relative; background: linear-gradient(135deg,#FEF3C7,#fff4c8); border:1px solid #f4e3ab; border-radius:1rem; padding:0.45rem 1rem 0.65rem; transition: all 0.2s ease;}
+.comment-bubble:hover {box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.comment-content {word-break: break-word;}
+.comment-actions button {font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; width:2.25rem; height:2.25rem; transition: all 0.2s;}
+.comment-actions .edit-comment {color:#2563eb;}
+.comment-actions .edit-comment:hover {background-color:#bfdbfe;}
+.comment-actions .delete-comment {color:#dc2626;}
+.comment-actions .delete-comment:hover {background-color:#fecaca;}
+</style>
+
 <div class="max-w-6xl mx-auto mt-6">
 
-    <!-- COVER -->
+    <!-- PROFILE HEADER -->
     <div class="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
-        <img
-            src="{% if profile_user.profile.cover_photo %}
-                    {{ profile_user.profile.cover_photo.url }}
-                 {% else %}
-                    {% static 'images/default-cover.png' %}
-                 {% endif %}"
-            class="w-full h-full object-cover"
-            alt="Cover photo"
-        >
+        <img src="{% if profile_user.profile.cover_photo %}{{ profile_user.profile.cover_photo.url }}{% else %}{% static 'images/default-cover.png' %}{% endif %}"
+             class="w-full h-full object-cover" alt="Cover photo">
     </div>
+    
 
-    <!-- PROFILE HEADER CARD -->
     <div class="relative bg-white rounded-2xl shadow-lg px-6 pb-6 -mt-20">
-
-        <!-- AVATAR + ACTIONS -->
         <div class="flex flex-col md:flex-row md:items-end md:justify-between">
-
-            <!-- Avatar -->
             <div class="flex flex-col md:flex-row items-center md:items-end">
-                <img
-                    src="{% if profile_user.profile.avatar %}
-                            {{ profile_user.profile.avatar.url }}
-                         {% else %}
-                            {% static 'images/default-avatar.png' %}
-                         {% endif %}"
-                    class="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover"
-                    alt="Avatar"
-                >
-
-                <!-- Name + Bio -->
+                <img src="{% if profile_user.profile.avatar %}{{ profile_user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
+                     class="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover" alt="Avatar">
                 <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
-                    <h2 class="text-3xl font-bold text-gray-900">
-                        {{ profile_user.profile.full_name|default:profile_user.username }}
-                    </h2>
-
+                    <h2 class="text-3xl font-bold text-gray-900">{{ profile_user.profile.full_name|default:profile_user.username }}</h2>
                     {% if profile_user.profile.bio %}
-                        <p class="text-gray-500 mt-1 max-w-xl">
-                            {{ profile_user.profile.bio }}
-                        </p>
+                    <p class="text-gray-500 mt-1 max-w-xl">{{ profile_user.profile.bio }}</p>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- ACTION BUTTONS -->
             <div class="mt-6 md:mt-0 flex gap-3">
-
-                {# MESSAGE BUTTON (future feature) #}
                 {% if request.user.is_authenticated and request.user != profile_user %}
                 <a href="{% url 'messaging:start' profile_user.username %}"
-                class="px-5 py-2 rounded-xl bg-gradient-to-r
-                        from-[#FBBF24] via-[#F59E0B] to-[#D97706]
-                        text-white font-medium hover:bg-orange-900
-                        transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Message
+                   class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white font-medium hover:bg-orange-900 transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Message
                 </a>
-
                 {% endif %}
-
-                {# EDIT PROFILE BUTTON (only own profile) #}
                 {% if request.user == profile_user %}
                 <a href="{% url 'accounts:my_profile' %}"
-                class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium
-                        hover:bg-orange-700 transition shadow
-                        flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    Edit Profile
+                   class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium hover:bg-orange-700 transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Profile
                 </a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- STATS + FOLLOW -->
+        <!-- Stats -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-6">
-
-            <!-- STATS -->
             <div class="flex items-center gap-8 text-center justify-center md:justify-start">
-
                 <a href="{% url 'accounts:followers_list' profile_user.username %}">
-                <p id="followers-count-{{ profile_user.username }}" class="text-lg font-semibold text-gray-900 hover:underline">
-                    {{ followers_count }}
-                </p>
-
+                    <p id="followers-count-{{ profile_user.username }}" class="text-lg font-semibold text-gray-900 hover:underline">
+                        {{ followers_count }}
+                    </p>
                     <p class="text-sm text-gray-500">Followers</p>
                 </a>
-
                 <a href="{% url 'accounts:following_list' profile_user.username %}">
-                    <p class="text-lg font-semibold text-gray-900 hover:underline">
-                        {{ following_count }}
-                    </p>
+                    <p class="text-lg font-semibold text-gray-900 hover:underline">{{ following_count }}</p>
                     <p class="text-sm text-gray-500">Following</p>
                 </a>
-
             </div>
-
-
-            <!-- FOLLOW / UNFOLLOW -->
             {% if request.user.is_authenticated and request.user != profile_user %}
             <button type="button"
                     class="follow-btn mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow flex items-center gap-2
-                        {% if is_following %}
-                            bg-red-600 text-white hover:bg-red-700
-                        {% else %}
-                            bg-blue-600 text-white hover:bg-blue-700
-                        {% endif %}"
+                           {% if is_following %}bg-red-600 text-white hover:bg-red-700{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %}"
                     data-username="{{ profile_user.username }}"
                     data-following="{{ is_following|yesno:'true,false' }}">
-
                 <span class="flex items-center gap-1">
                     {% if is_following %}
-                        <i class="fa-solid fa-user-minus"></i> Unfollow
+                    <i class="fa-solid fa-user-minus"></i> Unfollow
                     {% else %}
-                        <i class="fa-solid fa-user-plus"></i> Follow
+                    <i class="fa-solid fa-user-plus"></i> Follow
                     {% endif %}
                 </span>
             </button>
             {% endif %}
-
-
         </div>
     </div>
 
-    <!-- INFO SECTIONS -->
+    <!-- PERSONAL & PROFESSIONAL INFO -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-
         <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
             <h3 class="font-semibold text-lg mb-4">Personal Info</h3>
             <ul class="space-y-2 text-gray-600">
@@ -141,17 +111,14 @@
                     <li><strong>Location:</strong> {{ profile_user.profile.location }}</li>
                 {% endif %}
                 {% if profile_user.profile.website %}
-                    <li>
-                        <strong>Website:</strong>
-                        <a href="{{ profile_user.profile.website }}"
-                           class="text-blue-600 hover:underline" target="_blank">
+                    <li><strong>Website:</strong> 
+                        <a href="{{ profile_user.profile.website }}" class="text-blue-600 hover:underline" target="_blank">
                             {{ profile_user.profile.website }}
                         </a>
                     </li>
                 {% endif %}
             </ul>
         </div>
-
         <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
             <h3 class="font-semibold text-lg mb-4">Professional Info</h3>
             <ul class="space-y-2 text-gray-600">
@@ -163,162 +130,452 @@
                 {% endif %}
             </ul>
         </div>
-
     </div>
 
-    <!-- POSTS -->
-    <div class="mt-10">
-        <h3 class="text-lg font-semibold mb-4">Posts</h3>
 
-        {% for post in posts %}
-        <div class="bg-white rounded-xl shadow p-4 mb-4 space-y-3">
+    <!-- ---------------- POSTS ---------------- -->
+    <div class="mt-8 space-y-6">
+        {% if page_obj.object_list %}
+            {% for post in page_obj.object_list %}
+            <div id="post-{{ post.id }}" class="bg-white rounded-xl shadow p-4 space-y-3">
 
-            {% if post.original_post %}
-                <!-- SHARED POST HEADER -->
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                    <img src="{{ post.author.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover">
-                    <a href="{% url 'accounts:profile_detail' post.author.username %}"
-                    class="font-medium text-gray-700 hover:underline">
-                        {{ post.author.username }}
-                    </a>
-                    <span>shared this post</span>
-                </div>
-
-                <div class="border rounded-lg p-3 bg-gray-50 space-y-2">
-                    <div class="flex items-center gap-2">
-                        <img src="{{ post.original_post.author.profile.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
-                        <p class="font-medium">
-                            <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}">
-                                {{ post.original_post.author.username }}
-                            </a>
-                        </p>
+                <!-- POST HEADER -->
+                <div class="flex justify-between items-start">
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'accounts:profile_detail' post.author.username %}">
+                            <img src="{{ post.author.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover">
+                        </a>
+                        <div>
+                            <p class="font-medium">
+                                <a href="{% url 'accounts:profile_detail' post.author.username %}">
+                                    {{ post.author.profile.full_name }}
+                                </a>
+                            </p>
+                            <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+                            {% if post.original_post %}
+                            <p class="text-xs text-gray-400">Shared a post from 
+                                <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}" class="hover:underline">
+                                    {{ post.original_post.author.profile.full_name }}
+                                </a>
+                            </p>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <p class="text-gray-800">{{ post.original_post.content }}</p>
-
-                    {% if post.original_post.image %}
-                        <img src="{{ post.original_post.image.url }}" class="rounded-lg">
+                    <!-- Menu -->
+                    {% if post.author == request.user %}
+                    <div class="relative">
+                        <button class="post-menu-btn p-1 rounded-full hover:bg-gray-100">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                        <div class="post-menu hidden absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-lg z-20">
+                            <a href="{% url 'posts:edit_post' post.id %}" class="block px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </a>
+                            <form method="POST" action="{% url 'posts:delete_post' post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('Delete this post?')" class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
-            {% else %}
-                <!-- NORMAL POST -->
-                <div class="flex items-center gap-3">
-                    <img src="{{ post.author.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover">
-                    <div>
-                        <p class="font-medium">
-                            <a href="{% url 'accounts:profile_detail' post.author.username %}">
-                                {{ post.author.username }}
-                            </a>
-                        </p>
-                        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+
+                <!-- POST CONTENT -->
+                {% if post.original_post %}
+                <!-- Shared post -->
+                <div class="bg-gray-50 p-4 rounded-lg border">
+                    <p class="text-gray-800">{{ post.original_post.content }}</p>
+                    {% if post.original_post.image %}
+                    <img src="{{ post.original_post.image.url }}" class="rounded-lg mt-2">
+                    {% endif %}
+                </div>
+                {% else %}
+                <!-- Normal post -->
+                <p class="text-gray-800 mt-2">{{ post.content }}</p>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="rounded-lg">
+                {% endif %}
+                {% endif %}
+
+                <!-- REACTIONS & SHARE -->
+                <div class="relative flex items-center justify-between mt-3 pt-2 border-t text-sm">
+                    <div class="reaction-bar flex items-center gap-3" data-post-id="{{ post.id }}">
+                        {% with post_reactions=reaction_map|get_item:post.id %}
+                        {% for key, label in reaction_choices %}
+                        <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-lg transition hover:bg-gray-100 {% if user_reactions|get_item:post.id == key %} bg-gray-200 font-semibold {% endif %}" data-reaction="{{ key }}" data-color="{{ reaction_colors|get_item:key }}">
+                            <span class="{{ reaction_colors|get_item:key }}"><i class="fa-solid {{ reaction_icons|get_item:key }}"></i></span>
+                            <span class="text-gray-700">{{ label }}</span>
+                            <span class="reaction-count text-gray-500 ml-1">{{ post_reactions|get_item:key|default:"0" }}</span>
+                        </button>
+                        {% endfor %}
+                        {% endwith %}
                     </div>
+
+                    <div class="reaction-float-container absolute bottom-0 left-0 w-full h-full pointer-events-none"></div>
+                    <div class="reaction-picker hidden absolute -top-12 left-0 bg-white shadow-lg rounded-full px-3 py-2 flex gap-3 z-30">
+                        {% for key, label in reaction_choices %}
+                        <button class="picker-reaction text-xl hover:scale-125 transition" data-reaction="{{ key }}">
+                            <i class="fa-solid {{ reaction_icons|get_item:key }}"></i>
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{% url 'posts:share_post' post.id %}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-800 transition font-medium">
+                        <i class="fa-solid fa-share"></i> Share
+                    </a>
                 </div>
 
-                <p class="text-gray-800">{{ post.content }}</p>
+                <!-- COMMENTS -->
+                <div class="mt-4 space-y-3" id="comments-container-{{ post.id }}">
+                    {% for comment in post.comments.all %}
+                    <div class="flex gap-3 items-start" data-comment-id="{{ comment.id }}">
+                        <a href="{% url 'accounts:profile_detail' comment.user.username %}">
+                            <img src="{{ comment.user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover">
+                        </a>
+                        <div class="flex-1 relative pl-2">
+                            <div class="comment-bubble bg-gray-50 hover:shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <a href="{% url 'accounts:profile_detail' comment.user.username %}" class="font-semibold text-sm text-gray-900 hover:underline">
+                                        {{ comment.user.profile.full_name }}
+                                    </a>
+                                    {% if comment.user == request.user %}
+                                    <div class="flex gap-2">
+                                        <button class="edit-comment text-blue-600 hover:bg-blue-100 p-2 rounded-lg"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="delete-comment text-red-600 hover:bg-red-100 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <p class="comment-content text-gray-800 mt-1 text-sm">{{ comment.content }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-gray-400">Be the first to comment.</p>
+                    {% endfor %}
+                </div>
 
-                {% if post.image %}
-                    <img src="{{ post.image.url }}" class="rounded-lg">
-                {% endif %}
-            {% endif %}
-
-            <!-- Reactions -->
-            {% with post_reactions=reaction_map|get_item:post.id %}
-            <div class="reaction-bar flex items-center gap-3 text-sm mt-3" data-post-id="{{ post.id }}">
-                {% for key, label in reaction_choices %}
-                <button
-                    class="reaction-btn px-2 py-1 rounded flex items-center gap-1
-                        {% if user_reactions|get_item:post.id == key %}
-                            bg-gray-200 font-semibold
-                        {% endif %}"
-                    data-reaction="{{ key }}">
-                    
-                    <!-- Icon -->
-                    <span class="mr-1 {{ reaction_colors|get_item:key }}">
-                        <i class="fa-solid {{ reaction_icons|get_item:key }}"></i>
-                    </span>
-
-                    <!-- Label text -->
-                    <span class="text-gray-700">{{ label }}</span>
-
-                    <!-- Count -->
-                    <span class="reaction-count text-gray-500 ml-1">
-                        {{ post_reactions|get_item:key|default:"0" }}
-                    </span>
-                </button>
-                {% endfor %}
-            </div>
-            {% endwith %}
-
-
-            <!-- ACTION BUTTONS -->
-            {% with target_post=post.original_post|default:post %}
-            <div class="flex justify-end items-center gap-2 text-sm mt-2">
-
-                <!-- SHARE BUTTON -->
-                <a href="{% url 'posts:share_post' target_post.id %}"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                        text-white bg-blue-600 hover:bg-blue-800 transition font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 12v.01M8 12h12m-8-4l4 4-4 4" />
-                    </svg>
-                    <span>Share</span>
-                </a>
-
-                <!-- EDIT/DELETE (for post owner, including sharer) -->
-                {% if request.user == post.author %}
-                    <!-- EDIT -->
-                    <a href="{% url 'posts:edit_post' post.id %}"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600
-                            text-white hover:bg-green-800
-                            transition font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5h2m-1-1v2m8 2l-9 9-4 1 1-4 9-9" />
-                        </svg>
-                        <span>Edit</span>
-                    </a>
-
-                    <!-- DELETE -->
-                    <form method="POST" action="{% url 'posts:delete_post' post.id %}">
-                        {% csrf_token %}
-                        <button type="submit"
-                                onclick="return confirm('Delete this post?')"
-                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600
-                                    text-white hover:bg-red-800 transition font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span>Delete</span>
-                        </button>
-                    </form>
-                {% endif %}
+                <!-- COMMENT INPUT -->
+                <form class="comment-form mt-3 flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm" data-post-id="{{ post.id }}">
+                    {% csrf_token %}
+                    <img src="{{ request.user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover">
+                    <input type="text" name="content" placeholder="Write a comment..."
+                        class="flex-1 bg-gray-100 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                        aria-label="Add a comment">
+                    <button type="submit" class="flex items-center gap-1 text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-full text-sm font-medium transition">
+                        <i class="fa-solid fa-comment"></i> Comment
+                    </button>
+                </form>
 
             </div>
-            {% endwith %}
+            {% endfor %}
 
-        </div>
-        {% empty %}
-        <p class="text-gray-500">No posts yet.</p>
-        {% endfor %}
+            <!-- PAGINATION -->
+            <div class="flex justify-center mt-6">
+                <nav class="inline-flex space-x-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">&laquo; Prev</a>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <span class="px-3 py-1 rounded-lg bg-blue-600 text-white">{{ num }}</span>
+                        {% else %}
+                        <a href="?page={{ num }}" class="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">Next &raquo;</a>
+                    {% endif %}
+                </nav>
+            </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-center gap-4 mt-6">
-            {% if posts.has_previous %}
-                <a href="?page={{ posts.previous_page_number }}"
-                class="text-indigo-600">
-                    Previous
-                </a>
-            {% endif %}
-            {% if posts.has_next %}
-                <a href="?page={{ posts.next_page_number }}"
-                class="text-indigo-600">
-                    Next
-                </a>
-            {% endif %}
-        </div>
+        {% else %}
+            <p class="text-center text-gray-500">No posts yet.</p>
+        {% endif %}
     </div>
 
+
 </div>
+
+<!-- Reaction Sound -->
+<audio id="reaction-sound" src="{% static 'sounds/reaction-pop.mp3' %}" preload="auto"></audio>
+
+<!-- JS Section -->
+<script>
+document.addEventListener("change", function (e) {
+    if (e.target.id !== "post-image-input") return;
+    const file = e.target.files[0];
+    if (!file) return;
+    const previewWrapper = document.getElementById("image-preview");
+    const previewImg = document.getElementById("preview-img");
+    const errorMsg = document.getElementById("image-error");
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    errorMsg.classList.add("hidden");
+    previewWrapper.classList.add("hidden");
+    previewImg.src = "";
+    if (!allowedTypes.includes(file.type)) {
+        errorMsg.textContent = "Unsupported image format. Please select JPG, JPEG, PNG, or WEBP.";
+        errorMsg.classList.remove("hidden");
+        e.target.value = "";
+        return;
+    }
+    previewImg.src = URL.createObjectURL(file);
+    previewWrapper.classList.remove("hidden");
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  // --- Add Comment ---
+  document.querySelectorAll(".comment-form").forEach(form => {
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const postId = form.dataset.postId;
+      const input = form.querySelector("input[name='content']");
+      const content = input.value.trim();
+      if (!content) return;
+
+      const res = await fetch(`/interactions/comment/${postId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value },
+        body: new URLSearchParams({ content })
+      });
+      if (!res.ok) {
+        alert("Failed to add comment");
+        return;
+      }
+      const data = await res.json();
+
+      // Add new comment to DOM
+      const container = document.getElementById(`comments-container-${postId}`);
+      const newComment = document.createElement("div");
+      newComment.className = "flex gap-3 items-start";
+      newComment.dataset.commentId = data.id;
+      newComment.innerHTML = `
+        <a href="/accounts/profile/${data.user}/">
+          <img src="${data.avatar}" class="w-10 h-10 rounded-full object-cover">
+        </a>
+        <div class="flex-1">
+          <div class="bg-gray-100 rounded-2xl px-4 py-3 shadow-sm relative comment-bubble">
+            <div class="flex justify-between items-start">
+              <a href="/accounts/profile/${data.user}/" class="font-semibold text-sm text-gray-800 hover:underline">
+                ${data.user}
+              </a>
+              <div class="flex gap-2 text-gray-400 text-xs comment-actions opacity-0 hover:opacity-100 transition">
+                <button class="edit-comment" title="Edit comment">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="delete-comment" title="Delete comment">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <p class="comment-content text-sm text-gray-700 mt-1 leading-relaxed">${data.content}</p>
+            <span class="text-xs text-gray-400 absolute bottom-1 right-3">Just now</span>
+          </div>
+        </div>
+      `;
+      container.prepend(newComment); // add to top
+      input.value = ""; // clear input
+    });
+  });
+
+  // --- Edit / Delete Comments ---
+  document.addEventListener("click", async function (e) {
+    const commentWrapper = e.target.closest("[data-comment-id]");
+    if (!commentWrapper) return;
+    const commentId = commentWrapper.dataset.commentId;
+
+    // Edit
+    if (e.target.closest(".edit-comment")) {
+      const contentEl = commentWrapper.querySelector(".comment-content");
+      const oldText = contentEl.textContent.trim();
+      const newText = prompt("Edit your comment:", oldText);
+      if (!newText || newText === oldText) return;
+
+      const res = await fetch(`/interactions/comment/${commentId}/edit/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `content=${encodeURIComponent(newText)}`
+      });
+      if (res.ok) contentEl.textContent = newText;
+      else alert("Failed to edit comment");
+    }
+
+    // Delete
+    if (e.target.closest(".delete-comment")) {
+      if (!confirm("Delete this comment?")) return;
+      const res = await fetch(`/interactions/comment/${commentId}/delete/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value }
+      });
+      if (res.ok) commentWrapper.remove();
+      else alert("Failed to delete comment");
+    }
+
+  });
+
+});
+
+
+document.addEventListener("click", async function (e) {
+  // Post Menu Toggle
+  document.querySelectorAll(".post-menu").forEach(menu => menu.classList.add("hidden"));
+  if (e.target.closest(".post-menu-btn")) {
+    e.stopPropagation();
+    const wrapper = e.target.closest(".relative");
+    const menu = wrapper.querySelector(".post-menu");
+    menu.classList.toggle("hidden");
+  }
+});
+
+/* ---------------- Floating Emoji ---------------- */
+function spawnFloatingEmoji(container, iconClass, color) {
+  const emoji = document.createElement("i");
+  emoji.className = `fa-solid ${iconClass} floating-emoji`;
+  emoji.style.color = color;  // set the emoji color
+  emoji.style.left = (Math.random() * 60 + 20) + "%";
+  container.appendChild(emoji);
+  setTimeout(() => emoji.remove(), 900);
+}
+
+/* ---------------- Reaction Click ---------------- */
+document.addEventListener("click", async function(e) {
+  // ---- Reaction Button ----
+  const btn = e.target.closest(".reaction-btn");
+  if (btn) {
+    const container = btn.closest(".reaction-bar").parentElement;
+    const picker = container.querySelector(".reaction-picker");
+    const floatContainer = container.querySelector(".reaction-float-container");
+    const postId = btn.closest(".reaction-bar").dataset.postId;
+    const reaction = btn.dataset.reaction;
+    const countEl = btn.querySelector(".reaction-count");
+
+    // Remove active from all
+    container.querySelectorAll(".reaction-btn").forEach(b => b.classList.remove("reaction-active"));
+
+    // Animate clicked
+    btn.classList.add("reaction-active", "reaction-animate");
+    setTimeout(() => btn.classList.remove("reaction-animate"), 350);
+
+    // Optimistic count
+    const current = parseInt(countEl.textContent || "0");
+    countEl.textContent = current + 1;
+
+    // Floating emoji with color
+    const iconClass = btn.querySelector("i").classList[1];
+    const color = window.getComputedStyle(btn.querySelector("span")).color;
+    spawnFloatingEmoji(floatContainer, iconClass, color);
+
+    // Play reaction sound
+    const sound = document.getElementById("reaction-sound");
+    if (sound) {
+        sound.currentTime = 0; // rewind
+        sound.play();
+    }
+
+    // Send backend
+    try {
+      const res = await fetch(`/interactions/react/${postId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reaction })
+      });
+      if (!res.ok) throw new Error("Reaction failed");
+    } catch {
+      btn.classList.remove("reaction-active");
+      countEl.textContent = current;
+    }
+
+    // Hide picker
+    if (picker) picker.classList.add("hidden");
+  }
+
+  // ---- Picker Button ----
+  const pickerBtn = e.target.closest(".picker-reaction");
+  if (pickerBtn) {
+    e.stopPropagation();
+    const container = pickerBtn.closest(".reaction-picker").parentElement;
+    const floatContainer = container.querySelector(".reaction-float-container");
+    const postId = container.querySelector(".reaction-bar").dataset.postId;
+    const reaction = pickerBtn.dataset.reaction;
+    const mainBtn = container.querySelector(`.reaction-btn[data-reaction="${reaction}"]`);
+    if (!mainBtn) return;
+
+    // Animate main button
+    mainBtn.classList.add("reaction-active", "reaction-animate");
+    setTimeout(() => mainBtn.classList.remove("reaction-animate"), 350);
+
+    // Optimistic count
+    const countEl = mainBtn.querySelector(".reaction-count");
+    const current = parseInt(countEl.textContent || "0");
+    countEl.textContent = current + 1;
+
+    // Floating emoji with color
+    const iconClass = mainBtn.querySelector("i").classList[1];
+    const color = window.getComputedStyle(mainBtn.querySelector("span")).color;
+    spawnFloatingEmoji(floatContainer, iconClass, color);
+
+    // 🎵 Play reaction sound
+    const sound = document.getElementById("reaction-sound");
+    if (sound) {
+        sound.currentTime = 0; // rewind
+        sound.play();
+    }
+
+    // Send backend
+    try {
+      const res = await fetch(`/interactions/react/${postId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reaction })
+      });
+      if (!res.ok) throw new Error("Reaction failed");
+    } catch {
+      mainBtn.classList.remove("reaction-active");
+      countEl.textContent = current;
+    }
+
+    // Hide picker
+    pickerBtn.closest(".reaction-picker").classList.add("hidden");
+  }
+});
+
+/* ---------------- Long Press ---------------- */
+let pressTimer;
+document.addEventListener("mousedown", function(e){
+  const btn = e.target.closest(".reaction-btn");
+  if(!btn) return;
+  const container = btn.closest(".reaction-bar").parentElement;
+  const picker = container.querySelector(".reaction-picker");
+
+  pressTimer = setTimeout(() => {
+    picker.classList.remove("hidden");
+  }, 500);
+});
+
+document.addEventListener("mouseup", ()=> clearTimeout(pressTimer));
+document.addEventListener("mouseleave", ()=> clearTimeout(pressTimer));
+
+/* ---------------- Close Picker on Outside Click ---------------- */
+document.addEventListener("click", function(e){
+  document.querySelectorAll(".reaction-picker").forEach(picker => {
+    if(!picker.contains(e.target) && !e.target.closest(".reaction-btn")){
+      picker.classList.add("hidden");
+    }
+  });
+});
+
+</script>
+
 {% endblock %}
