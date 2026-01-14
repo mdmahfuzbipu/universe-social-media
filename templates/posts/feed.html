@@ -178,14 +178,41 @@
     {% if post.original_post %}
     <div class="flex justify-between items-start">
 
-      <!-- Left: Avatar + Name + "shared this post" -->
-      <div class="flex items-center gap-2 text-sm text-gray-500">
-        <a href="{% url 'accounts:profile_detail' post.author.username %}"><img src="{{ post.author.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover"></a>
-        <a href="{% url 'accounts:profile_detail' post.author.username %}" class="font-medium text-gray-700 hover:underline">
-          {{ post.author.profile.full_name }}
+    <!-- Left: Avatar + Name + "Shared a post" -->
+    <div class="flex flex-col gap-1 text-sm text-gray-500">
+
+      <!-- Author + Shared Post + Timestamp -->
+      <div class="flex items-center gap-2">
+        <!-- Avatar -->
+        <a href="{% url 'accounts:profile_detail' post.author.username %}">
+          <img src="{{ post.author.profile.avatar.url }}" class="w-8 h-8 rounded-full object-cover border border-gray-300">
         </a>
-        <span>shared this post</span>
+
+        <!-- Name + Shared Info -->
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1">
+            <a href="{% url 'accounts:profile_detail' post.author.username %}" class="font-medium text-gray-800 hover:underline">
+              {{ post.author.profile.full_name }}
+            </a>
+
+            {% if post.original_post %}
+            <span class="text-xs text-gray-400">
+              shared a post from 
+              <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}" class="hover:underline font-medium text-gray-700">
+                {{ post.original_post.author.profile.full_name }}
+              </a>
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Timestamp -->
+          <span class="text-xs text-gray-500 mt-0.5">{{ post.created_at|timesince }} ago</span>
+        </div>
       </div>
+
+    </div>
+
+
 
       <!-- Right: Menus -->
       <div class="flex gap-2">

@@ -33,64 +33,73 @@
 .comment-actions .delete-comment:hover {background-color:#fecaca;}
 </style>
 
-<div class="max-w-6xl mx-auto mt-6">
 
-    <!-- PROFILE HEADER -->
+<div class="max-w-9xl mx-auto mt-6">
+
+    <!-- Cover photo -->
     <div class="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
         <img src="{% if profile_user.profile.cover_photo %}{{ profile_user.profile.cover_photo.url }}{% else %}{% static 'images/default-cover.png' %}{% endif %}"
-             class="w-full h-full object-cover" alt="Cover photo">
+            class="w-full h-full object-cover" alt="Cover photo">
+        <div class="absolute inset-0 bg-black bg-opacity-25 rounded-2xl"></div>
     </div>
-    
 
-    <div class="relative bg-white rounded-2xl shadow-lg px-6 pb-6 -mt-20">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between">
-            <div class="flex flex-col md:flex-row items-center md:items-end">
-                <img src="{% if profile_user.profile.avatar %}{{ profile_user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
-                     class="w-36 h-36 rounded-full border-4 border-white shadow-xl object-cover" alt="Avatar">
-                <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
+    <!-- Profile Card -->
+    <div class="relative bg-white rounded-2xl shadow-xl -mt-20 p-6 flex flex-col md:flex-row md:items-start md:justify-between gap-6 transition hover:shadow-2xl">
+
+        <!-- Left: Avatar + Name + Bio + Stats -->
+        <div class="flex flex-1 items-start gap-6">
+
+            <!-- Avatar -->
+            <img src="{% if profile_user.profile.avatar %}{{ profile_user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}"
+                class="w-36 h-36 rounded-full border-4 border-white shadow-lg object-cover transition-transform hover:scale-105" alt="Avatar">
+
+            <!-- Name, Bio & Stats -->
+            <div class="flex-1 flex flex-col gap-3">
+                <div class="flex flex-col md:flex-row md:items-center md:gap-6">
                     <h2 class="text-3xl font-bold text-gray-900">{{ profile_user.profile.full_name|default:profile_user.username }}</h2>
-                    {% if profile_user.profile.bio %}
-                    <p class="text-gray-500 mt-1 max-w-xl">{{ profile_user.profile.bio }}</p>
-                    {% endif %}
+
+                    <!-- Followers / Following beside Name -->
+                    <div class="flex items-center gap-4 mt-2 md:mt-0 text-gray-700">
+                        <a href="{% url 'accounts:followers_list' profile_user.username %}" class="flex items-center gap-1 text-orange-500 hover:text-orange-600 transition">
+                            <i class="fa-solid fa-users"></i> {{ followers_count }} Followers
+                        </a>
+                        <a href="{% url 'accounts:following_list' profile_user.username %}" class="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition">
+                            <i class="fa-solid fa-user-group"></i> {{ following_count }} Following
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-6 md:mt-0 flex gap-3">
-                {% if request.user.is_authenticated and request.user != profile_user %}
-                <a href="{% url 'messaging:start' profile_user.username %}"
-                   class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white font-medium hover:bg-orange-900 transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Message
-                </a>
-                {% endif %}
-                {% if request.user == profile_user %}
-                <a href="{% url 'accounts:my_profile' %}"
-                   class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium hover:bg-orange-700 transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit Profile
-                </a>
+
+                <!-- Bio -->
+                {% if profile_user.profile.bio %}
+                <p class="text-gray-500 mt-2 text-sm md:text-base max-w-full md:max-w-lg">{{ profile_user.profile.bio }}</p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-6">
-            <div class="flex items-center gap-8 text-center justify-center md:justify-start">
-                <a href="{% url 'accounts:followers_list' profile_user.username %}">
-                    <p id="followers-count-{{ profile_user.username }}" class="text-lg font-semibold text-gray-900 hover:underline">
-                        {{ followers_count }}
-                    </p>
-                    <p class="text-sm text-gray-500">Followers</p>
-                </a>
-                <a href="{% url 'accounts:following_list' profile_user.username %}">
-                    <p class="text-lg font-semibold text-gray-900 hover:underline">{{ following_count }}</p>
-                    <p class="text-sm text-gray-500">Following</p>
-                </a>
-            </div>
+        <!-- Right: Actions -->
+        <div class="flex flex-wrap gap-3 mt-4 md:mt-0 items-start">
+
+            {% if request.user.is_authenticated and request.user != profile_user %}
+            <a href="{% url 'messaging:start' profile_user.username %}"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white font-medium hover:from-green-600 hover:to-green-800 shadow-md flex items-center gap-2 transition-transform hover:scale-105">
+                <i class="fa-solid fa-paper-plane"></i> Message
+            </a>
+            {% endif %}
+
+            {% if request.user == profile_user %}
+            <a href="{% url 'accounts:my_profile' %}"
+            class="px-5 py-2 rounded-xl bg-orange-500 text-white font-medium hover:bg-orange-700 shadow-md flex items-center gap-2 transition-transform hover:scale-105">
+                <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+            </a>
+            {% endif %}
+
             {% if request.user.is_authenticated and request.user != profile_user %}
             <button type="button"
-                    class="follow-btn mt-4 md:mt-0 px-7 py-2 rounded-xl font-medium transition shadow flex items-center gap-2
-                           {% if is_following %}bg-red-600 text-white hover:bg-red-700{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %}"
+                    class="follow-btn px-7 py-2 rounded-xl font-medium shadow-md flex items-center gap-2
+                        {% if is_following %}bg-red-600 text-white hover:bg-red-700{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %} transition-transform hover:scale-105"
                     data-username="{{ profile_user.username }}"
                     data-following="{{ is_following|yesno:'true,false' }}">
-                <span class="flex items-center gap-1">
+                <span class="flex items-center gap-2">
                     {% if is_following %}
                     <i class="fa-solid fa-user-minus"></i> Unfollow
                     {% else %}
@@ -99,37 +108,45 @@
                 </span>
             </button>
             {% endif %}
+
         </div>
     </div>
 
-    <!-- PERSONAL & PROFESSIONAL INFO -->
+    <!-- Personal & Professional Info Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
-            <h3 class="font-semibold text-lg mb-4">Personal Info</h3>
-            <ul class="space-y-2 text-gray-600">
+
+        <!-- Personal Info -->
+        <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col gap-4">
+            <h3 class="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                <i class="fa-solid fa-user text-yellow-500"></i> Personal Info
+            </h3>
+            <ul class="space-y-2 text-gray-700">
                 {% if profile_user.profile.location %}
-                    <li><strong>Location:</strong> {{ profile_user.profile.location }}</li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-orange-500"></i>{{ profile_user.profile.location }}</li>
                 {% endif %}
                 {% if profile_user.profile.website %}
-                    <li><strong>Website:</strong> 
-                        <a href="{{ profile_user.profile.website }}" class="text-blue-600 hover:underline" target="_blank">
-                            {{ profile_user.profile.website }}
-                        </a>
-                    </li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-globe text-blue-500"></i>
+                    <a href="{{ profile_user.profile.website }}" class="hover:underline text-blue-600" target="_blank">{{ profile_user.profile.website }}</a>
+                </li>
                 {% endif %}
             </ul>
         </div>
-        <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
-            <h3 class="font-semibold text-lg mb-4">Professional Info</h3>
-            <ul class="space-y-2 text-gray-600">
+
+        <!-- Professional Info -->
+        <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col gap-4">
+            <h3 class="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                <i class="fa-solid fa-briefcase text-purple-500"></i> Professional Info
+            </h3>
+            <ul class="space-y-2 text-gray-700">
                 {% if profile_user.profile.education %}
-                    <li><strong>Education:</strong> {{ profile_user.profile.education }}</li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-green-500"></i>{{ profile_user.profile.education }}</li>
                 {% endif %}
                 {% if profile_user.profile.skills %}
-                    <li><strong>Skills:</strong> {{ profile_user.profile.skills }}</li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-code text-pink-500"></i>{{ profile_user.profile.skills }}</li>
                 {% endif %}
             </ul>
         </div>
+
     </div>
 
 
@@ -186,7 +203,19 @@
                 <!-- POST CONTENT -->
                 {% if post.original_post %}
                 <!-- Shared post -->
-                <div class="bg-gray-50 p-4 rounded-lg border">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <!-- Original author info -->
+                    <div class="flex items-center gap-3 mb-2">
+                        <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}">
+                            <img src="{{ post.original_post.author.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-gray-300">
+                        </a>
+                        <div>
+                            <a href="{% url 'accounts:profile_detail' post.original_post.author.username %}" class="font-semibold text-gray-900 hover:underline">
+                                {{ post.original_post.author.profile.full_name }}
+                            </a>
+                            <p class="text-xs text-gray-500">{{ post.original_post.created_at|timesince }} ago</p>
+                        </div>
+                    </div>
                     <p class="text-gray-800">{{ post.original_post.content }}</p>
                     {% if post.original_post.image %}
                     <img src="{{ post.original_post.image.url }}" class="rounded-lg mt-2">
