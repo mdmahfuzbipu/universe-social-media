@@ -31,6 +31,8 @@ urlpatterns = [
     path("interactions/", include("interactions.urls")),
     path("", home_redirect, name="home"),
     path("posts/", include("posts.urls")),
+    path("notifications/", include("notifications.urls")),
+    path("messaging/", include("messaging.urls")),
 ]
 
 

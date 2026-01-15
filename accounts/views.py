@@ -9,6 +9,10 @@ from posts.models import Post
 from interactions.models import Follow
 from .models import Profile
 from .forms import UserRegisterForm, ProfileUpdateForm  
+from posts.views import reaction_icons, reaction_colors
+from interactions.models import Reaction
+from .helpers import get_reaction_map, get_user_reactions
+
 
 User = get_user_model()
 
@@ -44,11 +48,21 @@ def profile_detail(request, username):
         ).exists()
 
     # USER POSTS
-    posts_qs = Post.objects.filter(author=user).select_related("author")
+    posts_qs = Post.objects.filter(author=user).select_related(
+        "author", "original_post", "original_post__author"
+    ).prefetch_related(
+        "reactions",
+        "comments",
+        "comments__user",
+        "comments__user__profile",
+    ).order_by("-created_at")
 
-    paginator = Paginator(posts_qs, 5)  # 5 posts per page
+    paginator = Paginator(posts_qs, 5)
     page_number = request.GET.get("page")
-    posts = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
+
+    reaction_map = get_reaction_map(page_obj.object_list)
+    user_reactions = get_user_reactions(request.user, page_obj.object_list)
 
     context = {
         "profile_user": user,
@@ -56,8 +70,14 @@ def profile_detail(request, username):
         "followers_count": followers_count,
         "following_count": following_count,
         "is_following": is_following,
-        "posts": posts,  
+        "page_obj": page_obj,
+        "reaction_map": reaction_map,
+        "user_reactions": user_reactions,
+        "reaction_icons": reaction_icons,
+        "reaction_choices": Reaction.REACTION_CHOICES,
+        "reaction_colors": reaction_colors,
     }
+
 
     return render(request, "accounts/profile_detail.html", context)
 
@@ -135,3 +155,40 @@ def search(request):
         "users": users,
     }
     return render(request, "accounts/search_results.html", context)
+
+
+@login_required
+def people(request):
+    query = request.GET.get("q", "").strip()
+
+    qs = (
+        User.objects.exclude(id=request.user.id)
+        .annotate(
+            is_following=Exists(
+                Follow.objects.filter(follower=request.user, following=OuterRef("pk"))
+            )
+        )
+        .filter(is_following=False)
+        .select_related("profile")
+        .order_by("-date_joined")
+    )
+
+    if query:
+        qs = qs.filter(
+            Q(username__icontains=query)
+            | Q(profile__full_name__icontains=query)
+            | Q(profile__skills__icontains=query)
+        )
+
+    paginator = Paginator(qs, 12)  # 12 users per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "accounts/people.html",
+        {
+            "page_obj": page_obj,
+            "query": query,
+        },
+    )

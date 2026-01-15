@@ -58,4 +58,5 @@ urlpatterns = [
         "profile/<str:username>/following/", views.following_list, name="following_list"
     ),
     path("search/", views.search, name="search"),
+    path("people/", views.people, name="people"),
 ]

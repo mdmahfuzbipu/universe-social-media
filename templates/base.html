@@ -8,6 +8,10 @@
 
     <!-- Tailwind + Plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=line-clamp"></script>
+    <!-- Emoji Button library -->
+    <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+
+
 
 
     <!-- Font Awesome -->
@@ -20,18 +24,63 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            }
+
+            .animate-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+            }
+        .reaction-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            }
+
+
+        @keyframes float-up {
+        0% {
+            opacity: 0;
+            transform: translateY(10px) scale(0.8);
+        }
+        20% {
+            opacity: 1;
+            transform: translateY(0) scale(1.3);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-40px) scale(1);
+        }
+        }
+
+        .floating-emoji {
+        position: absolute;
+        font-size: 1.5rem;
+        animation: float-up 0.9s ease forwards;
+        }
+        
+
     </style>
 </head>
 
-<body class="bg-[#fdf8ff] text-gray-800" style="background-image: url('{% static 'images/background.png' %}');">
+<body class="bg-[#fdf8ff] min-h-screen flex flex-col"
+      style="background-image: url('{% static 'images/background.png' %}');">
+
 
 <!-- ================= NAVBAR ================= -->
 <header class="sticky top-0 z-50 bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706] shadow-md">
-    <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-9xl mx-auto px-9">
         <div class="flex items-center justify-between h-16 md:h-18">
 
             <!-- LEFT: Logo + Search -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-6">
 
                 <!-- Logo -->
                 <a href="{% url 'posts:feed' %}" class="flex items-center">
@@ -39,7 +88,6 @@
                         alt="UniVerse"
                         class="h-24 md:h-32 w-auto">
                 </a>
-
 
                 <!-- Search Users -->
                 <form method="GET"
@@ -49,52 +97,218 @@
                     <div class="relative">
                         <input type="text"
                             name="q"
-                            placeholder="Search people you may know.. "
+                            placeholder="Search people you may know..."
                             class="w-96 lg:w-[440px]
-                                    px-4 py-2 pl-10 text-sm
-                                    rounded-xl bg-orange-50
-                                    border border-orange-300
-                                    placeholder:text-gray-500
-                                    focus:outline-none
-                                    focus:ring-2 focus:ring-orange-400">
+                                   px-4 py-2 pl-10 text-sm
+                                   rounded-xl bg-orange-50
+                                   border border-orange-300
+                                   placeholder:text-gray-500
+                                   focus:outline-none
+                                   focus:ring-2 focus:ring-orange-400">
 
                         <i class="fas fa-search absolute left-3 top-1/2
-                                -translate-y-1/2 text-orange-500 text-sm"></i>
+                               -translate-y-1/2 text-orange-500 text-sm"></i>
                     </div>
                 </form>
-
-
             </div>
 
-            <!-- RIGHT: Profile -->
+            <!-- RIGHT: Navigation + Profile -->
             <div class="flex items-center gap-6">
 
+                <!-- NAV ICONS -->
+                <div class="hidden md:flex items-center gap-4">
+                    <!-- Home -->
+                    <a href="{% url 'posts:feed' %}" class="flex flex-col items-center text-white hover:text-white/80 transition">
+                        <i class="fas fa-home text-xl"></i>
+                        <span class="text-xs mt-1">Home</span>
+                    </a>
+
+            <!-- People -->
+            <a href="{% url 'accounts:people' %}"
+            class="flex flex-col items-center text-white hover:text-white/80 transition">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-xs mt-1">People</span>
+            </a>
+
+
+
+            <!-- Messages -->
+            <div class="relative" id="msg-wrapper">
+                <button id="msg-btn"
+                    class="flex flex-col items-center text-white hover:text-white/80 transition relative">
+
+                    <i class="fas fa-comment-alt text-xl"></i>
+                    <span class="text-xs mt-1">Messages</span>
+
+                    {% if unread_messages_count > 0 %}
+                        <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px]
+                                    flex items-center justify-center
+                                    text-[11px] font-bold
+                                    text-white bg-red-600 rounded-full px-1">
+                            {{ unread_messages_count }}
+                        </span>
+                    {% endif %}
+                </button>
+            <!-- MESSAGES DROPDOWN -->
+            <div id="msg-dropdown"
+                class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border z-50">
+
+                <div class="px-4 py-2 font-semibold border-b text-gray-700">
+                    Messages
+                </div>
+
+                <ul class="max-h-96 overflow-y-auto">
+                    {% for msg in recent_messages %}
+                        <li class="px-4 py-3 border-b hover:bg-gray-50
+                            {% if not msg.is_read %}bg-blue-50{% endif %}">
+
+                                <a href="{% url 'messaging:mark_as_read' msg.id %}?next={% url 'messaging:detail' msg.conversation.id %}"
+                                class="flex gap-3 items-start text-sm text-gray-700">
+
+                                <!-- AVATAR -->
+                                <img
+                                    src="{{ msg.sender.profile.avatar.url }}"
+                                    alt="{{ msg.sender.username }}"
+                                    class="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                                >
+
+                                <!-- CONTENT -->
+                                <div class="flex-1 leading-snug">
+                                    <div>
+                                        <strong>{{ msg.sender.profile.full_name }} :</strong>
+                                        {{ msg.content|truncatechars:40 }}
+                                    </div>
+
+                                    <div class="text-xs text-gray-400 mt-1">
+                                        {{ msg.created_at|timesince }} ago
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    {% empty %}
+                        <li class="px-4 py-3 text-sm text-gray-500">
+                            No messages
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            <div class="px-4 py-2 border-t">
+                <a href="{% url 'messaging:inbox' %}"
+                class="block w-full text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition">
+                    View all
+                </a>
+            </div>
+
+            </div>
+            </div>
+
+                <!-- Notifications -->
+                <div class="relative" id="notif-wrapper">
+                    <button id="notif-btn"
+                        class="flex flex-col items-center text-white hover:text-white/80 transition relative">
+
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="text-xs mt-1">Notifications</span>
+
+                        {% if unread_notifications_count > 0 %}
+                            <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px]
+                                        flex items-center justify-center
+                                        text-[11px] font-bold
+                                        text-white bg-red-600 rounded-full px-1">
+                                {{ unread_notifications_count }}
+                            </span>
+                        {% endif %}
+                    </button>
+
+                    <!-- DROPDOWN -->
+                    <div id="notif-dropdown"
+                        class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border z-50">
+
+                        <div class="px-4 py-2 font-semibold border-b text-gray-700">
+                            Notifications
+                        </div>
+
+                        <ul class="max-h-96 overflow-y-auto">
+                            {% for notif in request.user.notifications.all|slice:":5" %}
+                                <li class="px-4 py-3 border-b hover:bg-gray-50
+                                    {% if not notif.read %}bg-yellow-50{% endif %}">
+
+                                    <a href="{% url 'notifications:mark_as_read' notif.id %}?next={{ notif.get_target_url }}"
+                                    class="flex gap-3 items-start text-sm text-gray-700">
+
+                                        <!-- AVATAR -->
+                                        <img
+                                            src="{{ notif.sender.profile.avatar.url }}"
+                                            alt="{{ notif.sender.username }}"
+                                            class="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                                        >
+
+                                        <!-- CONTENT -->
+                                        <div class="flex-1 leading-snug">
+                                            <div>
+                                                <strong>{{ notif.sender.profile.full_name }}</strong>
+                                                {{ notif.get_message }}
+                                            </div>
+
+                                            <div class="text-xs text-gray-400 mt-1">
+                                                {{ notif.created_at|timesince }} ago
+                                            </div>
+                                        </div>
+
+                                    </a>
+                                </li>
+
+                            {% empty %}
+                                <li class="px-4 py-3 text-sm text-gray-500">
+                                    No notifications
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    <div class="px-4 py-2 border-t">
+                        <a href="{% url 'notifications:list' %}"
+                        class="block w-full text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition">
+                            View all
+                        </a>
+                    </div>
+
+                    </div>
+                </div>
+
+
+                </div>
+
                 <!-- Profile Dropdown -->
-                <div class="relative group">
-                    <button class="flex items-center gap-2 focus:outline-none">
+                <div class="relative">
+                    <button
+                        id="profileMenuBtn"
+                        class="flex items-center gap-2 focus:outline-none"
+                        onclick="toggleProfileMenu()"
+                    >
                         <img
                             src="{{ request.user.profile.avatar.url }}"
-                            class="w-9 h-9 rounded-full object-cover
-                                border-2 border-white shadow"
-                            alt="Profile">
+                            class="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+                            alt="Profile"
+                        >
                         <i class="fas fa-chevron-down text-sm text-white/80"></i>
                     </button>
 
                     <!-- Dropdown -->
-                    <div class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
-                                opacity-0 invisible group-hover:opacity-100
-                                group-hover:visible transition-all duration-200">
-
+                    <div
+                        id="profileMenu"
+                        class="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg
+                            opacity-0 invisible scale-95
+                            transition-all duration-150 origin-top-right z-50"
+                    >
                         <a href="{% url 'accounts:profile_detail' request.user.username %}"
-                        class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl">
+                           class="block px-4 py-3 text-sm hover:bg-gray-100 rounded-t-xl font-semibold">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
 
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit"
-                                    class="w-full text-left px-4 py-3 text-sm
-                                        hover:bg-gray-100 rounded-b-xl">
+                                    class="w-full text-left px-4 py-3 text-sm text-red-600 font-semibold rounded-b-xl">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
@@ -103,27 +317,60 @@
 
             </div>
         </div>
-
     </div>
 </header>
 
 <!-- ================= MAIN ================= -->
-<main class="max-w-7xl mx-auto px-2 py-4">
+<main class="flex-1 max-w-9xl mx-auto px-9 py-2 w-full">
 
     <!-- ================= MESSAGES ================= -->
     {% if messages %}
-      <div class="mb-6 space-y-2">
+    <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-3 w-full max-w-sm px-4">
         {% for message in messages %}
-          <div class="px-4 py-2 rounded shadow
-                      {% if message.tags == 'error' %}bg-red-600 text-white{% endif %}
-                      {% if message.tags == 'success' %}bg-green-600 text-white{% endif %}
-                      {% if message.tags == 'warning' %}bg-yellow-600 text-white{% endif %}
-                      {% if message.tags == 'info' %}bg-blue-600 text-white{% endif %}">
+        <div
+            class="flex items-start gap-3 p-4 rounded-xl shadow-lg border
+            {% if message.tags == 'success' %}
+            bg-green-600 border-green-200 text-white
+            {% elif message.tags == 'error' %}
+            bg-red-600 border-red-200 text-white
+            {% elif message.tags == 'warning' %}
+            bg-yellow-500 border-yellow-200 text-white
+            {% else %}
+            bg-blue-600 border-blue-200 text-white
+            {% endif %}
+            animate-slide-in"
+        >
+
+            <!-- ICON -->
+            <div class="mt-0.5 text-lg">
+            {% if message.tags == 'success' %}
+                <i class="fa-solid fa-circle-check"></i>
+            {% elif message.tags == 'error' %}
+                <i class="fa-solid fa-circle-xmark"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+                <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div class="flex-1 text-sm font-medium leading-relaxed">
             {{ message }}
-          </div>
+            </div>
+
+            <!-- CLOSE -->
+            <button onclick="this.parentElement.remove()"
+                    class="text-lg leading-none opacity-50 hover:opacity-100">
+            ×
+            </button>
+
+        </div>
         {% endfor %}
-      </div>
+    </div>
     {% endif %}
+
 
     {% block content %}{% endblock %}
 </main>
@@ -132,7 +379,7 @@
 <footer class="bg-gradient-to-r from-[#FBBF24] via-[#F59E0B] to-[#D97706]
                border-t border-yellow-300">
 
-    <div class="max-w-7xl mx-auto px-1
+    <div class="max-w-9xl mx-auto px-9
                 flex items-center justify-between
                 py-1">
 
@@ -140,7 +387,7 @@
         <div class="flex items-center gap-2 leading-none">
             <img src="{% static 'images/universe-logo.png' %}"
                  alt="UniVerse Logo"
-                 class="h-24 md:h-32 w-auto object-contain">
+                 class="h-12 md:h-16 w-auto object-contain">
 
             <span class="text-xs text-black/80 leading-none">
                 © {% now "Y" %} UniVerse
@@ -217,5 +464,89 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
+
+<!-- Scripts for profile toggle -->
+<script>
+function toggleProfileMenu() {
+    const menu = document.getElementById("profileMenu");
+    menu.classList.toggle("opacity-0");
+    menu.classList.toggle("invisible");
+    menu.classList.toggle("scale-95");
+}
+
+// Close when clicking outside
+document.addEventListener("click", function (e) {
+    const btn = document.getElementById("profileMenuBtn");
+    const menu = document.getElementById("profileMenu");
+
+    if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("opacity-0", "invisible", "scale-95");
+    }
+});
+</script>
+
+<!-- Notification Dropdown JS -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("notif-btn");
+    const dropdown = document.getElementById("notif-dropdown");
+
+    btn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", () => {
+        dropdown.classList.add("hidden");
+    });
+});
+</script>
+
+<!-- Messaging Dropdown JS -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("msg-btn");
+    const dropdown = document.getElementById("msg-dropdown");
+
+    btn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", () => {
+        dropdown.classList.add("hidden");
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const emojiBtn = document.getElementById('emoji-button');
+    const chatInput = document.getElementById('chat-input');
+
+    // check if emojiBtn exists on this page
+    if (!emojiBtn) return;
+
+    const picker = new EmojiButton({
+        position: 'top-end',
+        theme: 'auto',
+        zIndex: 9999
+    });
+
+    emojiBtn.addEventListener('click', () => picker.togglePicker(emojiBtn));
+
+    picker.on('emoji', emoji => {
+        chatInput.value += emoji;
+        chatInput.focus();
+    });
+});
+</script>
+
+
+
+
+<!--Script for reactions-->
+<script src="{% static 'js/reactions.js' %}"></script>
 </body>
 </html>
