@@ -104,37 +104,38 @@ def reaction_toggle(request, post_id):
 @require_POST
 def add_comment(request, post_id):
     content = request.POST.get("content", "").strip()
-
     if not content:
         return JsonResponse({"error": "Comment cannot be empty"}, status=400)
 
     post = get_object_or_404(Post, id=post_id)
-
     comment = Comment.objects.create(user=request.user, post=post, content=content)
 
-    # notify post author
-    create_notification(
-        recipient=post.author,
-        sender=request.user,
-        notif_type=Notification.NOTIF_COMMENT,
-        post=post,
-        comment=comment,
-    )
-
-    # notify other commenters except the author and current user
-    other_commenters = (
-        post.comments.exclude(user__in=[post.author, request.user])
-        .values_list("user", flat=True)
-        .distinct()
-    )
-    for u_id in other_commenters:
+    # notify post author (avoid self notification)
+    if post.author != request.user:
         create_notification(
-            recipient=u_id,
+            recipient=post.author,
             sender=request.user,
             notif_type=Notification.NOTIF_COMMENT,
             post=post,
             comment=comment,
         )
+
+    # notify other commenters
+    other_commenters = (
+        User.objects.filter(comments__post=post)
+        .exclude(id__in=[post.author.id, request.user.id])
+        .distinct()
+    )
+
+    for user in other_commenters:
+        create_notification(
+            recipient=user,
+            sender=request.user,
+            notif_type=Notification.NOTIF_COMMENT,
+            post=post,
+            comment=comment,
+        )
+
     return JsonResponse(
         {
             "id": comment.id,
