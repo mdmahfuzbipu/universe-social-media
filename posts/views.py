@@ -2,33 +2,86 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
 
-
-from interactions.models import Follow
+from interactions.models import Follow, Reaction
 from .models import Post
 from .forms import PostForm
+from notifications.models import Notification
+from notifications.utils import create_notification
 
 User = get_user_model()
+
+
+reaction_icons = {
+    "like": "fa-thumbs-up",
+    "love": "fa-heart",
+    "haha": "fa-face-laugh",
+    "wow": "fa-face-surprise",
+    "sad": "fa-face-sad-tear",
+    "dislike": "fa-thumbs-down",
+}
+
+reaction_colors = {
+    "like": "text-blue-500",
+    "love": "text-red-500",
+    "haha": "text-yellow-400",
+    "wow": "text-orange-400",
+    "sad": "text-indigo-400",
+    "angry": "text-red-700",
+}
+
 
 @login_required
 def feed(request):
     # users I follow
-    following_users = Follow.objects.filter(
-        follower=request.user
-    ).values_list("following", flat=True)
-
-    # include own posts
-    posts = Post.objects.filter(
-        author__in=list(following_users) + [request.user.id]
-    ).select_related(
-        "author",
-        "original_post",
-        "original_post__author"
+    following_users = Follow.objects.filter(follower=request.user).values_list(
+        "following", flat=True
     )
 
-    paginator = Paginator(posts, 10)  # 10 posts per page
+    # posts from users I follow + my posts
+    posts = (
+        Post.objects.filter(author__in=list(following_users) + [request.user.id])
+        .select_related("author", "original_post", "original_post__author")
+        .prefetch_related(
+            "reactions",
+            "comments",
+            "comments__user",
+            "comments__user__profile",
+        )
+    )
+
+    # current user's reactions
+    user_reactions = {
+        r.post_id: r.reaction for r in Reaction.objects.filter(user=request.user)
+    }
+
+    reaction_choices = Reaction.REACTION_CHOICES
+
+    # reaction counts per post
+    reaction_qs = (
+        Reaction.objects.filter(post__in=posts)
+        .values("post_id", "reaction")
+        .annotate(count=Count("id"))
+    )
+
+    # build reaction_map: { post_id: {reaction_type: count} }
+    reaction_map = {}
+    for r in reaction_qs:
+        post_id = r["post_id"]
+        reaction = r["reaction"]
+        count = r["count"]
+
+        if post_id not in reaction_map:
+            reaction_map[post_id] = {}
+        reaction_map[post_id][reaction] = count
+
+    for post in posts:
+        if post.id not in reaction_map:
+            reaction_map[post.id] = {}
+
+    paginator = Paginator(posts, 5)  # 5 posts per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -43,7 +96,13 @@ def feed(request):
         "page_obj": page_obj,
         "form": form,
         "suggested_users": suggested_users,
+        "user_reactions": user_reactions,
+        "reaction_map": reaction_map,
+        "reaction_colors": reaction_colors,
+        "reaction_choices": reaction_choices,
+        "reaction_icons": reaction_icons,
     }
+
     return render(request, "posts/feed.html", context)
 
 
@@ -100,5 +159,12 @@ def share_post(request, post_id):
         return redirect("posts:feed")
 
     Post.objects.create(author=request.user, original_post=original)
-
+    # notify original post author
+    create_notification(
+        recipient=original.author,
+        sender=request.user,
+        notif_type=Notification.NOTIF_SHARE,
+        post=original
+    )
+    
     return redirect("posts:feed")
