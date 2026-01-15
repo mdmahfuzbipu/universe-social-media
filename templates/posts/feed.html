@@ -448,15 +448,31 @@
     <p class="text-center text-gray-500">No posts yet.</p>
     {% endfor %}
 
-    <!-- Pagination -->
-    <div class="flex justify-center gap-4">
-      {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}" class="text-indigo-600">Previous</a>
-      {% endif %}
-      {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}" class="text-indigo-600">Next</a>
-      {% endif %}
-    </div>
+  <!-- Pagination -->
+  <div class="flex justify-center items-center gap-3 mt-6">
+
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}"
+      class="px-5 py-2 rounded-full bg-gray-200 text-gray-700
+              hover:bg-gray-300 hover:text-gray-900
+              transition font-medium shadow-sm flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left"></i>
+      Previous
+    </a>
+    {% endif %}
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}"
+      class="px-5 py-2 rounded-full bg-indigo-600 text-white
+              hover:bg-indigo-700
+              transition font-medium shadow-md flex items-center gap-2">
+      Next
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+    {% endif %}
+
+  </div>
+
 
   </div>
 
