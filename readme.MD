@@ -38,12 +38,11 @@
 
 ---
 
-##  Demo Video
+## Demo Video
 
-**Watch the UniVerse Demo**  
-[![UniVerse Demo Video](static/images/demo-thumbnail.png)](demo/video/universe-demo.mp4)
+[![UniVerse Demo Video](static/images/demo-thumbnail.png)](https://youtu.be/aiGblKeTnm4)
 
-_Click the image to play the demo video_
+_Click the image to watch the demo video_
 
 The demo covers:
 - Authentication
