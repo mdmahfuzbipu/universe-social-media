@@ -1,108 +1,143 @@
-# UniVerse – Social Media Platform
+# UniVerse – University Social Networking Platform
 
-<img src="static/images/universe-logo.png" alt="UniVerse Banner" width="300" height="150">
+<img src="static/images/universe-logo.png" alt="UniVerse Logo" width="300" height="150">
 
-> **UniVerse** is a modern social media web application built with **Django** and **Tailwind CSS**, featuring secure authentication, user profiles, posts, social interactions, and notifications. Designed for learning **industry-standard backend and frontend workflows**.
+> **UniVerse** is a university-focused social networking web application built with **Django** and **Tailwind CSS**.  
+> The project demonstrates **real-world backend engineering, secure authentication, optimized performance, and modern UI/UX**, following **industry-standard workflows**.
 
 ---
 
-## 🔹 Table of Contents
+## Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Features](#features)
-3. [Tech Stack](#tech-stack)
-4. [Setup & Installation](#setup--installation)
-5. [Database Configuration](#database-configuration)
-6. [Git Workflow](#git-workflow)
-7. [Project Structure](#project-structure)
-8. [Usage](#usage)
-9. [Contribution](#contribution)
-10. [License](#license)
+2. [Demo](#-demo)
+3. [Features](#features)
+4. [Tech Stack](#tech-stack)
+5. [Security & Performance](#security--performance)
+6. [Setup & Installation](#setup--installation)
+7. [Database Configuration](#database-configuration)
+8. [Git Workflow](#git-workflow)
+9. [Project Structure](#project-structure)
+10. [Documentation (SRS & BRD)](#-documentation-srs--brd)
+11. [Usage](#usage)
+12. [Contribution](#contribution)
+13. [License](#license)
+14. [Team – UniVerse Developers](#-team--universe-developers)
 
 ---
 
-## 📝 Project Overview
+## Project Overview
 
-UniVerse is a **social media platform** with:
+**UniVerse** is designed to provide a **focused, distraction-free social platform** for university students.
 
-* Custom user authentication (register, login, logout, password reset)
-* Extended user profiles (bio, image, education, experience, skills, social links)
-* CRUD operations for posts (text + image)
-* Follow / Unfollow system
-* Feed displaying posts from followed users
-* Like & Share functionality
-* Direct messaging
-* Notifications for key activities
-* Responsive UI built with Tailwind CSS
-* Secure, environment-variable-driven configuration
-
-> Designed to mirror **real-world social media platforms** while teaching best practices in Django development.
+### Goals
+- Build a **production-style Django application**
+- Apply **security, permission control, and performance optimization**
+- Follow **industry-standard development practices**
+- Deliver a **clean, modern, and responsive UI**
 
 ---
 
-## 🌟 Features
+##  Demo Video
 
-**Authentication**
+**Watch the UniVerse Demo**  
+[![UniVerse Demo Video](static/images/demo-thumbnail.png)](demo/video/universe-demo.mp4)
 
-* Register, Login, Logout
-* Forgot Password / Reset Password (email-based)
+_Click the image to play the demo video_
 
-**Profile**
+The demo covers:
+- Authentication
+- Feed & post interaction
+- Profile view
+- Reactions & comments
+- Messaging & notifications
+- Permission-based access
 
-* Bio, Profile Picture
-* Personal Info: DOB, Location
-* Professional Info: Education, Experience, Skills
-* Social: Website URL
+---
 
-**Social**
+## Features
 
-* Post CRUD (text & image)
-* Follow / Unfollow users
-* Feed logic (followed users only)
-* Like & Share posts
+### Authentication & Authorization
+- User registration, login, logout
+- Password reset (email-based)
+- Django authentication system
+- CSRF protection for all forms
+- Permission checks using Django auth decorators
 
-**Messaging & Notifications**
+### 👤 User Profiles (`accounts`)
+- Profile picture & bio
+- Personal information
+- Professional information (education, experience, skills)
+- Profile statistics (posts, followers, following)
 
-* Direct 1-to-1 messaging
-* Real-time notification system using Django signals
+### 📝 Posts & Feed (`posts`)
+- Create, edit, delete posts (text & image)
+- Share posts
+- Personalized feed (followed users)
+- Pagination for scalability
 
-**UI**
+### ❤️ Interactions (`interactions`)
+- React to posts (like system)
+- Comment on posts
+- Optimized queries using `select_related` and `prefetch_related`
 
-* Tailwind CSS for responsive and modern design
-* Auth pages (`login`, `register`, `password reset`)
-* Base layout template for consistent design
+### 💬 Messaging (`messaging`)
+- One-to-one user messaging
+- Conversation-based message handling
+- Clean and intuitive chat UI
 
-**Development**
+### 🔔 Notifications (`notifications`)
+- Notifications for:
+  - Likes
+  - Comments
+  - Follows
+- Implemented using Django signals
 
-* Docker support for Django + PostgreSQL
-* Git feature-branch workflow
-* Environment variables with `.env`
+### 🎨 UI/UX
+- Tailwind CSS for modern styling
+- Responsive and mobile-friendly layout
+- Improved profile & feed UI
+- UI changes without affecting backend logic
 
 ---
 
 ## 🛠 Tech Stack
 
-| Layer      | Technology                           |
-| ---------- | ------------------------------------ |
-| Backend    | Django 6.x                           |
-| Frontend   | Tailwind CSS, HTML, Django Templates |
-| Database   | PostgreSQL                           |
-| Dev Tools  | Git, Python 3.11+, pip, venv          |
-| Deployment | Docker (optional)                    |
-| Email      | Django console backend (development) |
+| Layer | Technology |
+|------|-----------|
+| Backend | Django 6.x |
+| Frontend | Tailwind CSS, HTML, Django Templates |
+| Database | PostgreSQL |
+| Language | Python 3.11+ |
+| Dev Tools | Git, pip, virtualenv |
+| Configuration | `.env` environment variables |
 
 ---
 
-## ⚡ Setup & Installation
+## 🔐 Security & Performance
 
-**Clone the repository**
+### Security
+- CSRF protection enabled on all forms
+- Django authentication & authorization
+- Login-required access for sensitive actions
+- Owner-only permissions for post modification
 
+### Performance
+- Pagination for feeds and posts
+- Optimized ORM queries
+- Reduced N+1 query issues
+
+---
+
+## Setup & Installation
+
+### Clone the Repository
 ```bash
 git clone https://github.com/<your-username>/universe-social-media.git
 cd universe-social-media
-```
+````
 
-**Create & activate virtual environment**
+### Create & Activate Virtual Environment
 
 ```bash
 python -m venv venv
@@ -112,13 +147,13 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-**Install dependencies**
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**Configure environment variables**
+### Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -138,145 +173,142 @@ DEFAULT_FROM_EMAIL=no-reply@universe.com
 
 ---
 
-## 🗄 Database Configuration
-
-**Create PostgreSQL database**
+## Database Configuration
+Install PostgreSQL/MySQL successfully configure that and create a database like below in that:
 
 ```sql
 CREATE DATABASE universe_db;
 ```
-
-**Apply migrations**
+After creating the database come back to your project folder terminal, activate the virtual enivornment and run the below command:
 
 ```bash
 python manage.py migrate
-```
-
-**Create superuser**
-
-```bash
 python manage.py createsuperuser
-```
-
-**Run development server**
-
-```bash
 python manage.py runserver
 ```
+To visit the server go to the below link:
 
-Access the app at [http://127.0.0.1:8000](http://127.0.0.1:8000)
+ Application URL: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
-## 🌳 Git Workflow
+## Git Workflow
 
-* **Main branches**
+* **Main Branches**
 
-  * `main` → Production-ready
-  * `develop` → Integration / testing
+  * `main` → Stable / production-ready
+  * `develop` → Active development
 
-* **Feature branches**
+* **Feature Branches**
 
-  * `feature/<feature-name>` → Each module or fix
-  * PR → Code review → merge into `develop` → merge `develop` → `main`
+  * `feature/<feature-name>`
 
-* **Commit messages**
+* **Commit Convention**
 
 ```text
-<feature>: short descriptive message
+<module>: short meaningful message
 ```
 
 Example:
 
 ```text
-auth-system: add register and login functionality
-profile: add bio, experience, and social links
-password-reset: implement forgot/reset password system
+auth: add CSRF-protected login system
+feed: implement pagination and optimized queries
+ui: improve profile and feed layout
 ```
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 universe-social-media/
 ├── accounts/
-│   ├── admin.py
-│   ├── apps.py
-│   ├── forms.py
-│   ├── models.py
-│   ├── signals.py
-│   ├── urls.py
-│   ├── views.py
-│   └── templates/auth/
-│       ├── login.html
-│       ├── register.html
-│       ├── password_reset.html
-│       ├── password_reset_done.html
-│       ├── password_reset_confirm.html
-│       └── password_reset_complete.html
+├── interactions/
+├── messaging/
+├── notifications/
+├── posts/
+├── media/
+├── static/
+├── templates/
+├── theme/
 ├── universe/
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
-├── media/
-├── templates/
-│   ├── auth_base.html
-│   └── base.html
-├── venv/
-├── manage.py
+├── demo/
+│   └── video/
+│       └── universe-demo.mp4
+├── docs/
+│   ├── BRD_SRS_Universal_Socila_Media.pdf
 ├── .env
+├── manage.py
 └── requirements.txt
 ```
 
 ---
 
-## ▶ Usage
+## Documentation (SRS & BRD)
 
-* Register a new user
-* Login with credentials
-* Edit profile information
-* Create and manage posts
-* Follow / unfollow users
-* View feed of followed users
-* Use forgot/reset password when needed
+📁 **docs/**
+
+* **SRS (Software Requirements Specification)**
+  Functional & non-functional requirements
+
+* **BRD (Business Requirements Document)**
+  Business objectives, scope, and constraints
+
+These documents reflect **industry-style planning and requirement analysis**.
 
 ---
 
-## 🤝 Contribution
+## Usage
+
+* Register and login
+* Create, edit, and delete posts
+* React and comment on posts
+* Follow/unfollow users
+* Use messaging system
+* Receive notifications
+* Edit profile information
+
+---
+
+## Contribution
 
 1. Fork the repository
-2. Create a feature branch: `feature/<feature-name>`
+2. Create a feature branch
 3. Commit changes with meaningful messages
-4. Push branch and open a Pull Request to `develop`
-5. Code review → merge into `develop`
-6. After testing, merge `develop` into `main`
+4. Open a Pull Request to `develop`
+5. Review → merge → release to `main`
 
 ---
 
-## 📜 License
+## License
 
-This project is **for educational purposes**.
+This project is intended for **learning, demonstration, and portfolio purposes**.
 
 ---
 
 ## 👨‍💻 Team – UniVerse Developers
 
-This project has been developed by a dedicated team of **BAUET students**:
+Developed by **BAUET students**:
 
-| Name | Stack / Role |
-|------|--------------|
-| [Md Mahfuz Hossain](https://www.linkedin.com/in/muhammadmahfuzhossain/) | Full Stack |
-| [Tirtho Saha](https://www.linkedin.com/in/tirtho-saha-612b47265/) | Frontend |
-| [Israt Binte Elias](https://www.linkedin.com/in/israt-binte-elias-445a98257/) | Frontend |
-| [Sabrina Binty Akhtar](https://www.linkedin.com/in/sabrina-binty-akhtar-7617a1264) | Backend |
-| [Mst. Rizoana Khatun](https://www.linkedin.com/in/your-linkedin/) | Backend |
-| [Nafis Shahriar](https://www.linkedin.com/in/your-linkedin/) | Backend |
+| Name                                                                               | Role       |
+| ---------------------------------------------------------------------------------- | ---------- |
+| [Md. Mahfuz Hossain](https://www.linkedin.com/in/muhammadmahfuzhossain/)           | Full Stack |
+| [Tirtho Saha](https://www.linkedin.com/in/tirtho-saha-612b47265/)                  | Frontend   |
+| [Israt Binte Elias](https://www.linkedin.com/in/israt-binte-elias-445a98257/)      | Frontend   |
+| [Sabrina Binty Akhtar](https://www.linkedin.com/in/sabrina-binty-akhtar-7617a1264) | Backend    |
+| [Mst. Rizoana Khatun](https://www.linkedin.com/in/muhammadmahfuzhossain)           | Backend    |
+| [Nafis Shahriar](https://www.linkedin.com/in/nafis-shahriar-774b912a5)             | Backend    |
 
-All team members are **students of Bangladesh Army University of Engineering & Technology**, collaborating to build this social media platform.
+---
+## Project Status
+
+UniVerse is **feature-complete** and actively maintained.  
+Future improvements may include real-time communication, advanced notifications, and API support for mobile applications.
 
 ---
 
-
-
-
+**If you find this project useful, consider giving it a ⭐ on GitHub.**
